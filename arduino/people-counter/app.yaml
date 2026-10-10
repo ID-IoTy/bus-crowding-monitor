@@ -1,0 +1,10 @@
+name: People Counter
+description: Conta quante persone sono contemporaneamente visibili nell'inquadratura della fotocamera CSI
+ports: []
+bricks:
+- arduino:video_object_detection:
+    model: yolox-object-detection
+    labels:
+    - person
+- arduino:web_ui: {}
+icon: 👥
