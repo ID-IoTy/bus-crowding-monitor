@@ -17,13 +17,33 @@ def demand_multiplier(hour: float) -> float:
     return min(1.0, baseline + 0.85 * max(morning, evening))
 
 
-def boarders_for(hour: float, stop_sequence: int, stops_total: int, rng: random.Random) -> int:
+def weekday_multiplier(weekday: int) -> float:
+    """Scale demand by day of week (0=Mon .. 6=Sun).
+
+    Weekdays run at full demand; Saturday is lighter and the rush peaks flatten;
+    Sunday is the quietest day.
+    """
+    if weekday <= 4:        # Mon-Fri
+        return 1.0
+    if weekday == 5:        # Saturday
+        return 0.6
+    return 0.45             # Sunday
+
+
+def boarders_for(
+    hour: float,
+    stop_sequence: int,
+    stops_total: int,
+    rng: random.Random,
+    weekday: int = 0,
+) -> int:
     """How many people board at a stop given the time and position on route.
 
     Early stops (near the centre) attract more boardings during the morning;
-    later stops see fewer boardings but more alightings.
+    later stops see fewer boardings but more alightings. Weekend days are
+    lighter via the weekday multiplier.
     """
-    mult = demand_multiplier(hour)
+    mult = demand_multiplier(hour) * weekday_multiplier(weekday)
     position_factor = 1.0 - 0.5 * (stop_sequence / max(1, stops_total - 1))
     expected = 10 * mult * position_factor
     return max(0, int(rng.gauss(expected, expected * 0.4 + 1)))

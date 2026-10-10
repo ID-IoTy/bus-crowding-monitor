@@ -656,12 +656,39 @@ The project includes a full data simulator that generates realistic Turin bus ne
 - Consistent boarding math across all events
 
 ```bash
-# Generate a full simulated day and write to DB
-python simulator/simulate_day.py --date 2024-01-15 --output-to-db
+# Generate a full simulated day and write it to the DB
+python -m simulator.simulate_day --date 2024-01-15
 
-# Stream live events to the running server (1 real second = 1 simulated minute)
-python simulator/live_feed.py --speed 60
+# Stream live events to the running server (1 real second = 60 simulated seconds)
+python -m simulator.live_feed --speed 60
 ```
+
+### Sample week dataset (checked into the repo)
+
+A ready-made week of example API payloads lives in
+[`sample_data/`](sample_data/) — one file of `bus-event` bodies and one of
+`stop-event` bodies, exactly as the Arduino devices would have POSTed them over
+the previous week (Mon–Fri full demand, Sat–Sun lighter, with a few anomalies).
+
+These are the "requests the server received last week". Replaying them through
+the normal ingestion + correlation path fills `correlated_events`, which is the
+training set the ML model learns from:
+
+```bash
+# Regenerate the sample files (optional — they are already committed)
+python -m simulator.generate_sample_week --start 2024-01-08
+
+# Load the sample week into the DB, then train the model on it
+python seeder.py
+python -m simulator.load_sample_data
+python -m ml.train
+```
+
+```
+JSONL payloads ──► correlator ──► correlated_events ──► ml/train.py ──► model.joblib
+```
+
+See [`sample_data/README.md`](sample_data/README.md) for the full description.
 
 ---
 
