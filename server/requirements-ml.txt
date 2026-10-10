@@ -1,0 +1,13 @@
+# Optional ML stack. Enables the trained GradientBoostingRegressor model.
+# If these are not installed, the server automatically falls back to the
+# deterministic rule-based predictor (no loss of functionality for the demo).
+#
+# Install with:  pip install -r requirements-ml.txt
+#
+# NOTE: On very new Python versions (e.g. 3.14) prebuilt wheels for these may
+# not exist yet, forcing a slow source build. If that happens, either skip this
+# file (rule-based mode) or use Python 3.12.
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.4
+joblib>=1.3

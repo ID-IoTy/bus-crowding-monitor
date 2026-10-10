@@ -171,8 +171,12 @@ python -m venv venv
 venv\Scripts\activate        # Windows
 # source venv/bin/activate   # Linux/Mac
 
-# 3. Install dependencies
+# 3. Install core dependencies (lightweight, pure-Python wheels)
 pip install -r requirements.txt
+
+# 3b. (Optional) Install the ML stack to enable the trained model.
+#     Without it, the server automatically uses the rule-based predictor.
+pip install -r requirements-ml.txt
 
 # 4. Initialize the database
 python -m app.db.init_db
@@ -180,8 +184,9 @@ python -m app.db.init_db
 # 5. Seed routes, stops, buses & baseline schedule
 python seeder.py
 
-# 6. Train the ML model on simulated historical data
-python ml/train.py
+# 6. Simulate a day of history, then train the ML model (optional)
+python -m simulator.simulate_day --date 2024-01-15
+python -m ml.train
 
 # 7. Start the server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -189,6 +194,14 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 The server will be available at `http://localhost:8000`.  
 Interactive API docs (Swagger UI) at `http://localhost:8000/docs`.
+
+> **Prediction modes.** The engine has two layers. If the optional ML stack and a
+> trained `ml/model.joblib` are present it uses a `GradientBoostingRegressor`;
+> otherwise it transparently falls back to a deterministic rule-based predictor.
+> The demo works fully in either mode.
+
+> **Stop IDs.** Stops are identified as `{route}-S{nn}`, e.g. `R1-S05`, `R2-S12`
+> (sequence is 0-based, 00–39). Use these IDs in the API calls below.
 
 ---
 
@@ -209,7 +222,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 python simulator/live_feed.py --speed 60
 
 # Terminal 3 — query the API
-curl -H "X-API-Key: dev-key" http://localhost:8000/stops/S05/status
+curl -H "X-API-Key: dev-key" http://localhost:8000/stops/R1-S05/status
 ```
 
 ---
@@ -239,7 +252,7 @@ Called by the bus APC unit every time the bus closes its doors and leaves a stop
 {
   "bus_id": "BUS-01",
   "route_id": "R1",
-  "stop_id": "S05",
+  "stop_id": "R1-S05",
   "timestamp": "2024-01-15T08:32:00Z",
   "passengers_onboard": 34,
   "door_status": "closed",
@@ -255,7 +268,7 @@ Called by the bus stop camera/sensor every 60 seconds, and as a triggered event 
 **Request body:**
 ```json
 {
-  "stop_id": "S05",
+  "stop_id": "R1-S05",
   "timestamp": "2024-01-15T08:32:10Z",
   "people_waiting": 4,
   "event_type": "post_departure"
@@ -275,8 +288,8 @@ Returns upcoming buses, their ETAs, and predicted crowdedness for a specific sto
 **Response example:**
 ```json
 {
-  "stop_id": "S05",
-  "stop_name": "Corso Vittorio Emanuele II",
+  "stop_id": "R1-S05",
+  "stop_name": "Mirafiori (R1 #05)",
   "current_waiting": 7,
   "next_buses": [
     {
@@ -291,8 +304,8 @@ Returns upcoming buses, their ETAs, and predicted crowdedness for a specific sto
       "crowdedness_on_departure": "HIGH",
       "seats_available_on_arrival": 28,
       "route_forecast": [
-        {"stop_id": "S06", "stop_name": "Piazza Castello", "predicted_occupancy_pct": 85},
-        {"stop_id": "S07", "stop_name": "Via Roma", "predicted_occupancy_pct": 72}
+        {"stop_id": "R1-S06", "stop_name": "Crocetta (R1 #06)", "predicted_occupancy_pct": 85},
+        {"stop_id": "R1-S07", "stop_name": "San Salvario (R1 #07)", "predicted_occupancy_pct": 72}
       ]
     }
   ]
@@ -330,7 +343,7 @@ Returns a paginated list of detected anomalies. Requires admin API key.
       "anomaly_type": "OVERCROWDING",
       "severity": "HIGH",
       "route_id": "R1",
-      "stop_id": "S12",
+      "stop_id": "R1-S12",
       "bus_id": "BUS-01",
       "description": "Bus at 95% capacity with 11 people still waiting at stop",
       "status": "PENDING",
@@ -463,6 +476,26 @@ python simulator/simulate_day.py --date 2024-01-15 --output-to-db
 # Stream live events to the running server (1 real second = 1 simulated minute)
 python simulator/live_feed.py --speed 60
 ```
+
+---
+
+## Testing
+
+A pytest suite covers authentication, event correlation math, the prediction
+engine, the public API and anomaly detection.
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+The tests use an isolated in-memory SQLite database and FastAPI's `TestClient`,
+so they never touch your real `transport.db`.
+
+> **Correlation trigger.** In the real flow, a stop's `post_departure` event is
+> the last piece to arrive, so correlation (and the overcrowding check) fire when
+> that event is ingested — the server matches it to the nearby bus departure
+> automatically. No duplicate or "re-sent" events are required.
 
 ---
 
