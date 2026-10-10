@@ -1,0 +1,10 @@
+export type Scenario = 'normal' | 'rush' | 'overcrowded';
+export type Position = { lat: number; lon: number };
+export type Stop = Position & { id: string; name: string; waiting: number };
+export type Line = { id: string; routeId: string; name: string; description: string; direction: string; headsign: string; color: string; stops: Stop[]; shape: [number, number][] };
+export type Bus = { id: string; lineId: string; people: number; seats: number; capacity: number; nextStopIndex: number; etaMinutes: number; position: Position };
+export type Prediction = { stopId: string; busId: string; people: number; capacity: number; etaMinutes: number; source: 'mock' };
+export type Alert = { id: string; lineId: string; stopId: string; stopName: string; busId: string; waiting: number; available: number; excess: number; severity: 'critical' | 'warning' };
+export type HistoryPoint = { label: string; occupancy: number; waiting: number };
+export type Snapshot = { observedAt: string; source: 'mock'; lines: Line[]; buses: Bus[]; predictions: Record<string, Prediction[]>; alerts: Alert[]; hourly: HistoryPoint[]; weekly: HistoryPoint[] };
+export type Network = { source: string; sourceUrl: string; feedVersion: string; lines: (Omit<Line, 'stops'> & { stops: Omit<Stop, 'waiting'>[] })[] };
