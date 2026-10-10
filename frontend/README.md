@@ -1,97 +1,45 @@
-# Frontend prototype
+# Frontend v2
 
-Independent React/TypeScript passenger app and operator dashboard. The transport operator is not a project partner. All runtime transit activity is currently mocked; the backend is being implemented independently.
+React/TypeScript, Vite and Leaflet. All runtime activity is explicitly synthetic. No production backend logic is changed by this branch.
 
-## Run locally
-
-Prerequisite: Node.js 22.18+ (or Node.js 24) and npm. Development was verified with Node.js 24.14.
-
-From the repository root:
+## Run and verify
 
 ```powershell
 cd frontend
 npm ci
 npm run dev
-```
-
-Open:
-
-- Passenger view: http://127.0.0.1:5173/#citizens
-- Operator view: http://127.0.0.1:5173/#operators
-
-Both interfaces share one application and simulation state in a browser tab. Separate tabs initialize their own demo state; this is not a shared multi-user server simulation.
-
-## Checks
-
-```powershell
 npm test
 npm run build
 ```
 
-Tests cover capacity boundaries, forward-only journeys, nearest-stop distance, the exact demo fleet, and scenario recovery.
+Use Node 22.18+ or 24. Vite prints the actual localhost port. `/#citizens` and `/#operators` share simulation state in one tab; separate tabs are independent. History is hidden from the citizen interface but not protected by authentication.
 
-## Demo fleet
+## Implementation
 
-| Vehicle | Public route pattern | Direction |
-| --- | --- | --- |
-| BUS-1801 | 18U-0 | Piazza Sofia |
-| BUS-1802 | 18U-0 | Piazza Sofia |
-| BUS-6801 | 68U-0 | Via Cafasso |
+- `simulation.ts`: seeded private queue/destination and vehicle state; capacity-constrained boarding, alighting, one shared queue per stop; 60-second periodic observations, pre-arrival and post-departure observations. Simulation time advances in ten-second internal steps.
+- `predictions.ts`: consumes only public observations and learned aggregates, never private passenger destinations. Stop predictions anchor historical levels to current counts and estimate approaching bus effects. Bus predictions use learned net occupancy changes and observed demand.
+- `model.ts` / `model.worker.ts`: seven days of training, a separate calibration week and independent test week with disjoint seeds. Browser worker keeps preparation off the UI thread. Models are cached in memory per scenario.
+- `data.ts`: adapter and snapshot assembly, ready to be replaced by an agreed server adapter.
+- `MapView.tsx`: stable markers and route layers preserve map zoom, focus and tooltips during updates. Every physical stop ID renders once, even across routes.
 
-The two line 18 buses start at different positions in the same direction and have different illustrative arrival times. Return-direction patterns are visible, but have no simulated service.
+## Synthetic assumptions
 
-Counts, movement, ETA, predicted occupancy, capacities, and historical series are synthetic. Assumed vehicle capacity is 75 people including 32 seats; these are not verified vehicle specifications.
+Four lines, five vehicles, 271 unique imported stops. Full reverse patterns are visible but have no simulated buses. Travel is three minutes per segment, dwell is 30 or 60 seconds based on simulated boarding/alighting; terminal recycling waits ten minutes and starts a new synthetic trip. Marker travel interpolates between stop coordinates, not GPS or traffic measurements.
 
-Scenario controls provide normal service, rush hour, and overcrowding. Pause freezes movement; Reset returns to the initial normal scenario. Mock snapshots update every five seconds, with time accelerated for presentation. Vehicles loop after reaching the end of their pattern.
+Each queue contains line-specific groups and flexible groups with a common downstream destination on 33/42. Destinations remain private to simulation. Some people leave queues independently of buses; this is not surfaced as measured abandonment. Demand varies by time and scenario. There are deterministic four-minute sensor outage windows to exercise freshness.
 
-Operator acknowledgement is local to the current browser session. Scenario recovery clears active alerts. Production acknowledgement and resolution must come from the backend.
+Historic stop profiles are keyed by stop, weekday/weekend and 15-minute bucket. Net occupancy-change averages are keyed by route pattern and stop. A fresh count residual decays with a 15-minute time constant. Stop forecasts deduct estimated boardings on buses expected to depart within the horizon. Bus forecasts combine historical positive net change and observed demand (60/40 weighting). Coefficients are fixed demo assumptions, not optimized using the final test week.
 
-## Geography
+Bus reliability at an arbitrary arrival ETA is unavailable unless it exactly matches a calibrated fixed horizon. Fixed +5/+10/+15-minute bus forecasts are available in the expandable card. Reliability is empirical category accuracy, not a guarantee for an individual prediction. At least 30 calibration samples are required; category-specific test results expose imbalance and calibration drift.
 
-`public/network.json` is an extracted GTT fixture:
+Training history retains hourly means and one-minute aggregates: very busy stop-minutes, stale/missing stop-minutes and possible capacity-pressure stop-minutes. Bus history is sampled hourly. Pressure compares a single observed queue with combined space on buses approaching within ten minutes; intended lines remain unknown, so this is only a heuristic concern. It is not throughput or unique passengers.
 
-- Source: https://www.gtt.to.it/open_data/gtt_gtfs.zip
-- Feed version: 20261009
-- Service dates declared by the feed: 2026-10-08 through 2027-01-31
-- One common full trip pattern per direction of lines 18 and 68.
-- Stop counts: 18U-0: 50, 18U-1: 50, 68U-0: 41, 68U-1: 40.
-- Other trip patterns and route variants are omitted.
-- No GTT live positions, APC measurements, or occupancy forecasts were imported.
+The demonstration clock and profile weekday handling use UTC+2 for the September/October 2026 simulation dates, not a general daylight-saving calendar. Production timestamps and timezone handling must be supplied by the server.
 
-The import uses `routes.txt`, `stops.txt`, `trips.txt`, `stop_times.txt`, and `shapes.txt`. Stop times provide ordering; the demo does not use GTT schedules for ETAs.
+## Geography and limitations
 
-To regenerate after downloading the archive into the repository root:
+Static GTFS 20261009, one common full pattern per direction of 18, 68, 33, 42. `tools/import_gtfs.py` regenerates the fixture. No live operator measurements are included. Public source attribution stays in technical documentation; the operator is not affiliated with the project.
 
-```powershell
-python tools/import_gtfs.py gtt_gtfs.zip frontend/public/network.json
-```
+Capacities and thresholds are illustrative. Free seats cannot be inferred. Forecast map changes stop counts only; bus markers retain current simulated positions. No transfers, walking directions, prediction of individual intentions, server persistence or field validation.
 
-The archive itself is ignored by version control. Confirm dataset reuse terms before public redistribution. The repository is currently private.
-
-Leaflet renders the map with attributed OpenStreetMap tiles. The basemap and optional Google Fonts need an internet connection; route geometry is bundled locally. If tiles fail, the UI reports it and retains route overlays and markers. Localhost does not mean all visual assets are offline.
-
-## Backend integration
-
-Data access is centralized in `src/data.ts`. `getSnapshot()` currently creates deterministic mock observations and illustrative predictions.
-
-Replace that adapter with the colleague's API client once response shapes are agreed. Preserve the distinction between observed readings, server predictions, and mock values. Do not move production prediction or alert logic into React components.
-
-The types in `src/types.ts` are frontend view models, not a finalized server API. The UI currently needs:
-
-- Lines, direction patterns, ordered stops, and geometry.
-- Vehicle identity, route/direction association, position, occupancy, and capacity.
-- Waiting counts and observation timestamps.
-- Per-bus predictions for a stop: occupancy, ETA, provenance, and prediction time.
-- Alerts, acknowledgement state, and historical aggregates.
-
-A live adapter also needs loading/error states, freshness, missing values, polling or push updates, and server-backed alert actions. Unknown counts must not become zero.
-
-## Current limitations
-
-- No transfers or route optimization.
-- Simulated starting positions are placed at preset stops.
-- Forecasts are fixtures rather than validated statistical estimates.
-- Synthetic charts show a typical day and seven daily summary points, not stored raw observations.
-- The history chart is network-wide; the network filter applies to current metrics and the route table.
-- Acknowledgement, scenario selection, and simulation are not shared across tabs.
-- No physical display frontend is implemented.
+See the root README and `docs/API_CONTRACT.md` for integration status.

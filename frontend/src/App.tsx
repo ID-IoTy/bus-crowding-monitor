@@ -1,170 +1,89 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Bus, Scenario, Snapshot } from './types';
-import { getSnapshot } from './data';
-import { crowdClass, crowdLabel, distanceMeters, nearestStop, occupancy, remainingCapacity, routeSection, shortStop } from './domain';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Horizon, Model, Network, Reliability, Scenario, Snapshot, Stop } from './types';
+import { DemoAdapter, loadNetwork } from './data';
+import { compatibleArrivals, crowdClass, occupancy, shortStop } from './domain';
+import { busPeopleAt, reliability } from './predictions';
+import { category, fresh, HORIZONS } from './simulation';
+import { scoreSummary } from './model';
 import MapView from './MapView';
 import Chart from './Chart';
 
-type View = 'citizens' | 'operators';
-type OperatorTab = 'alerts' | 'analytics' | 'map';
-const scenarios: Record<Scenario, string> = { normal: 'Normal service', rush: 'Rush hour', overcrowded: 'Overcrowding' };
-
-function Icon({ name, size = 20 }: { name: string; size?: number }) {
- const paths: Record<string, string> = {
-  bus: 'M5 16V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v11M5 11h14M5 16h14M7 16v3m10-3v3M8 7h8',
-  map: 'm3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Zm6-2v16m6-14v16',
-  trend: 'M3 3v18h18M6 15l4-5 4 3 6-8',
-  alert: 'm12 3 10 18H2L12 3Zm0 6v5m0 3v.1',
-  pin: 'M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0ZM9 10a3 3 0 1 0 6 0 3 3 0 1 0-6 0',
-  arrow: 'M4 12h16m-6-6 6 6-6 6',
-  check: 'm5 12 4 4L19 6',
-  clock: 'M12 8v4l3 2M21 12a9 9 0 1 1-18 0 9 9 0 1 1 18 0',
-  people: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M9 3a4 4 0 1 1 0 8 4 4 0 1 1 0-8m8 .13a4 4 0 0 1 0 7.75'
- };
- return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name] || paths.bus}/></svg>;
+const scenarioNames: Record<Scenario, string> = { normal: 'Normal service', rush: 'Rush hour', overcrowded: 'Overcrowding' };
+const time = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const mean = (values: number[]) => values.length ? values.reduce((sum, n) => sum + n, 0) / values.length : null;
+function Confidence({ value }: { value: Reliability | null }) {
+ return <span className="confidence" title={value ? `${value.samples.toLocaleString()} calibration examples in this horizon/category. Correct-category frequency on synthetic data, not field accuracy.` : 'No matching calibration or only historical data available.'}>{value?.percent == null ? 'Reliability unavailable' : `${value.percent}% synthetic reliability`} {value?.percent != null && <small>n={value.samples.toLocaleString()}</small>}</span>;
 }
-
-function OccupancyBar({ bus }: { bus: Bus }) {
- const percent = occupancy(bus);
- return <div className="occupancy-track" aria-label={(percent ?? 'Unknown') + '% occupancy'}><div className={crowdClass(percent)} style={{ width: Math.min(100, percent ?? 0) + '%' }}/><span className="seat-threshold" style={{ left: bus.seats / bus.capacity * 100 + '%' }} title="Seated capacity"/></div>;
+function Metric({ label, value, note }: { label: string; value: string | number; note: string }) { return <article className="metric"><div className="metric-top">{label}</div><strong>{value}</strong><small>{note}</small></article>; }
+function StopDetails({ stop, snapshot }: { stop: Stop; snapshot: Snapshot }) {
+ const valid = fresh(stop, snapshot.observedAt);
+ return <section className="panel stop-details" aria-label="Selected stop details"><div className="panel-title"><div><span className="eyebrow">STOP DETAILS</span><h2>{shortStop(stop.name)}</h2></div><span className="subtle-badge">{[...new Set(stop.lineIds.map(id => snapshot.lines.find(l => l.id === id)!.name))].join(' · ')}</span></div><div className="stop-now"><strong>{stop.waiting ?? '—'}</strong><span>people at last observation<small>{stop.observedAt ? time(stop.observedAt) : 'No observation'} · {valid ? 'recent' : 'stale / unavailable'}</small></span></div><div className="forecast-grid">{snapshot.stopForecasts[stop.id].map(f => <article key={f.horizon}><span>+{f.horizon} min · {time(f.predictedAt).slice(0, 5)}</span><strong>≈{f.people}</strong><span className={'status-pill ' + crowdClass(f.people / stop.capacity * 100)}>{f.category}</span><Confidence value={f.reliability}/><small>{f.basis === 'live-history' ? 'Recent count + historical patterns' : 'Historical patterns only'}</small></article>)}</div><p className="explanation">Illustrative waiting capacity: {stop.capacity}. Busy from {Math.ceil(stop.capacity * .6)} people; very busy from {Math.ceil(stop.capacity * .85)}. These are demo thresholds, not verified safety limits.</p></section>;
 }
-
-function Metric({ icon, label, value, note, tone = '' }: { icon: string; label: string; value: string | number; note: string; tone?: string }) {
- return <article className={'metric ' + tone}><div className="metric-top"><span>{label}</span><span className="metric-icon"><Icon name={icon}/></span></div><strong>{value}</strong><small>{note}</small></article>;
+function Analytics({ model, snapshot }: { model: Model; snapshot: Snapshot }) {
+ const [lineFilter, setLineFilter] = useState('all'); const [stopFilter, setStopFilter] = useState('all'); const [day, setDay] = useState('all');
+ const possibleStops = snapshot.stops.filter(s => lineFilter === 'all' || s.lineIds.includes(lineFilter));
+ const ids = new Set(possibleStops.filter(s => stopFilter === 'all' || stopFilter === s.id).map(s => s.id));
+ const history = model.history.filter(r => ids.has(r.stopId) && (day === 'all' || r.day === day));
+ const busHistory = model.busHistory.filter(r => (lineFilter === 'all' || r.lineId === lineFilter) && (day === 'all' || r.day === day));
+ const ranking = possibleStops.filter(s => ids.has(s.id)).map(stop => {
+  const rows = history.filter(r => r.stopId === stop.id); return { stop, busy: rows.reduce((n, r) => n + r.busyMinutes, 0), missing: rows.reduce((n, r) => n + r.missingMinutes, 0), pressure: rows.reduce((n, r) => n + r.pressureMinutes, 0), peak: Math.max(0, ...rows.filter(r => r.observed).map(r => r.waiting)) };
+ }).sort((a, b) => b.busy - a.busy || b.pressure - a.pressure);
+ const hours = Array.from({ length: 24 }, (_, hour) => ({ label: `${String(hour).padStart(2, '0')}:00`, value: mean(history.filter(r => Math.floor(r.minute / 60) === hour && r.observed).map(r => r.waiting)) }));
+ const occupancyHours = Array.from({ length: 24 }, (_, hour) => ({ label: `${String(hour).padStart(2, '0')}:00`, value: mean(busHistory.filter(r => Math.floor(r.minute / 60) === hour).map(r => r.people / r.capacity * 100)) }));
+ const worstHour = [...hours].sort((a, b) => (b.value ?? -1) - (a.value ?? -1))[0];
+ return <>
+  <section className="panel analytics-panel"><div className="panel-title"><div><h2>Where the network needs attention</h2><p>Seven synthetic historical days · one-minute status samples, hourly summaries</p></div></div><div className="history-filters"><label>Line & direction<select value={lineFilter} onChange={e => { setLineFilter(e.target.value); setStopFilter('all'); }}><option value="all">All directions</option>{snapshot.lines.map(l => <option key={l.id} value={l.id}>{l.name} → {l.headsign}</option>)}</select></label><label>Stop<select value={stopFilter} onChange={e => setStopFilter(e.target.value)}><option value="all">All matching stops</option>{possibleStops.map(s => <option key={s.id} value={s.id}>{shortStop(s.name)}</option>)}</select></label><label>Day<select value={day} onChange={e => setDay(e.target.value)}><option value="all">Whole week</option>{[...new Set(model.history.map(r => r.day))].map(d => <option key={d}>{d}</option>)}</select></label></div></section>
+  <div className="metric-grid"><Metric label="Very busy stop-minutes" value={ranking.reduce((n, r) => n + r.busy, 0).toLocaleString()} note="Counted once per stop and sampled minute"/><Metric label="Possible capacity pressure" value={ranking.reduce((n, r) => n + r.pressure, 0).toLocaleString()} note="Stop-minutes; approaching capacity within 10 min, intended lines unknown"/><Metric label="Stale / missing stop-minutes" value={ranking.reduce((n, r) => n + r.missing, 0).toLocaleString()} note="Observations older than two simulated minutes"/><Metric label="Busiest average hour" value={worstHour.value === null ? '—' : worstHour.label} note="For the selected stops and days"/></div>
+  <div className="history-charts"><section className="panel analytics-panel"><h2>People at stops</h2><p className="explanation">Average people per monitored stop · selected filters</p><Chart points={hours} label="Historical people waiting by hour" unit="people"/></section><section className="panel analytics-panel"><h2>Bus occupancy</h2><p className="explanation">Total-capacity percentage · line/direction and day filters; stop filter does not apply</p><Chart points={occupancyHours} label="Historical bus occupancy by hour" unit="%"/></section></div>
+  <section className="panel table-panel"><div className="panel-title"><h2>Critical stops</h2><span className="subtle-badge">Top 12 · sorted by very busy minutes</span></div><div className="table-scroll"><table><thead><tr><th>Stop</th><th>Very busy min</th><th>Peak hourly mean</th><th>Pressure min</th><th>Missing / stale min</th></tr></thead><tbody>{ranking.slice(0, 12).map(r => <tr key={r.stop.id}><td>{shortStop(r.stop.name)}</td><td>{r.busy}</td><td>{r.peak.toFixed(1)}</td><td>{r.pressure}</td><td>{r.missing}</td></tr>)}</tbody></table></div></section>
+  <section className="panel table-panel"><div className="panel-title"><div><h2>Prediction quality on unseen synthetic days</h2><p>Separate training, calibration and test weeks. Metrics cover this scenario across the network, independently of the history filters.</p></div></div><div className="table-scroll"><table><thead><tr><th>Target</th><th>Horizon</th><th>Test examples</th><th>Correct category</th><th>MAE · people</th></tr></thead><tbody>{(['stop', 'bus'] as const).flatMap(kind => HORIZONS.map(h => { const score = scoreSummary(model.evaluation.test, kind, h); return <tr key={kind + h}><td>{kind === 'stop' ? 'Stop crowd' : 'Onboard count'}</td><td>+{h} min</td><td>{score.samples.toLocaleString()}</td><td>{score.accuracy?.toFixed(1) ?? '—'}%</td><td>{score.mae?.toFixed(2) ?? '—'}</td></tr>; }))}</tbody></table></div><details><summary>Calibration versus test, by predicted category</summary><div className="table-scroll"><table><thead><tr><th>Target / horizon</th><th>Predicted category</th><th>Calibration accuracy</th><th>Unseen test accuracy</th><th>Test n</th></tr></thead><tbody>{model.evaluation.calibration.map(c => { const t = scoreSummary(model.evaluation.test, c.kind, c.horizon, c.category); return <tr key={c.kind + c.horizon + c.category}><td>{c.kind} +{c.horizon}</td><td>{c.category}</td><td>{(c.correct / c.samples * 100).toFixed(1)}%</td><td>{t.accuracy?.toFixed(1) ?? '—'}%</td><td>{t.samples}</td></tr>; })}</tbody></table></div></details><p className="explanation">These numbers measure a deliberately simplified synthetic world. Common categories can dominate overall accuracy. No field accuracy or probability of finding a free seat is claimed.</p></section>
+ </>;
 }
-
 export default function App() {
- const [view, setView] = useState<View>(location.hash === '#operators' ? 'operators' : 'citizens');
- const [tab, setTab] = useState<OperatorTab>('alerts');
- const [scenario, setScenario] = useState<Scenario>('normal');
- const [paused, setPaused] = useState(false);
- const [tick, setTick] = useState(0);
- const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
- const [error, setError] = useState('');
- const [lineId, setLineId] = useState('18U-0');
- const [destination, setDestination] = useState('');
- const [originPreset, setOriginPreset] = useState(8);
- const [acknowledged, setAcknowledged] = useState<Record<string, boolean>>({});
- const [period, setPeriod] = useState<'day' | 'week'>('day');
- const [operatorFilter, setOperatorFilter] = useState('all');
-
+ const [view, setView] = useState<'citizens' | 'operators'>(location.hash === '#operators' ? 'operators' : 'citizens');
+ const [operatorTab, setOperatorTab] = useState<'map' | 'alerts' | 'history'>('map');
+ const [network, setNetwork] = useState<Network | null>(null); const [model, setModel] = useState<Model | null>(null); const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+ const [scenario, setScenario] = useState<Scenario>('normal'); const [paused, setPaused] = useState(false); const [progress, setProgress] = useState('Loading public route geometry…'); const [error, setError] = useState(''); const [retry, setRetry] = useState(0);
+ const [mode, setMode] = useState<'live' | 'forecast'>('live'); const [horizon, setHorizon] = useState<Horizon>(5); const [lineId, setLineId] = useState('33U-0'); const [origin, setOrigin] = useState('3380'); const [destination, setDestination] = useState('3696'); const [selectedStop, setSelectedStop] = useState('3380');
+ const [acknowledged, setAcknowledged] = useState<string[]>([]); const adapter = useRef<DemoAdapter | null>(null); const cache = useRef(new Map<Scenario, Model>());
+ useEffect(() => { let active = true; loadNetwork().then(n => { if (active) setNetwork(n); }).catch(e => { if (active) setError(String(e)); }); return () => { active = false; }; }, [retry]);
+ useEffect(() => { const listener = () => setView(location.hash === '#operators' ? 'operators' : 'citizens'); window.addEventListener('hashchange', listener); return () => window.removeEventListener('hashchange', listener); }, []);
  useEffect(() => {
-  const onHash = () => setView(location.hash === '#operators' ? 'operators' : 'citizens');
-  window.addEventListener('hashchange', onHash);
-  return () => window.removeEventListener('hashchange', onHash);
- }, []);
- useEffect(() => {
-  if (paused) return;
-  const timer = window.setInterval(() => setTick(value => value + 1), 5000);
-  return () => clearInterval(timer);
- }, [paused]);
- useEffect(() => {
-  const controller = new AbortController();
-  getSnapshot(scenario, tick, controller.signal).then(data => {
-   if (controller.signal.aborted) return;
-   setSnapshot(data); setError('');
-   setAcknowledged(current => Object.fromEntries(data.alerts.filter(alert => current[alert.id]).map(alert => [alert.id, true])));
-  }).catch(reason => { if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Unable to load demo data.'); });
-  return () => controller.abort();
- }, [scenario, tick]);
-
- const line = snapshot?.lines.find(candidate => candidate.id === lineId);
- const origin = useMemo(() => {
-  const stop = line?.stops[Math.min(originPreset, (line?.stops.length ?? 1) - 1)];
-  return stop ? { lat: stop.lat, lon: stop.lon } : undefined;
- }, [line?.id, originPreset, !!line]);
- const start = useMemo(() => snapshot && line && origin ? nearestStop([...line.stops, ...snapshot.lines.filter(candidate => candidate.id !== line.id).flatMap(candidate => candidate.stops)], origin) : undefined, [snapshot, origin, line]);
- const startIndex = line?.stops.findIndex(stop => stop.id === start?.id) ?? -1;
- useEffect(() => {
-  if (!line) return;
-  setDestination(current => line.stops.some(stop => stop.id === current) ? current : line.stops[Math.min(Math.max(startIndex, 0) + 6, line.stops.length - 1)].id);
- }, [line?.id, !!line, startIndex]);
- const route = line && start ? routeSection(line, start.id, destination) : [];
- const selectStop = useCallback((selectedLine: string, stopId: string) => {
-  setLineId(selectedLine); setDestination(stopId);
- }, []);
- const selectLine = (id: string) => { setLineId(id); setDestination(''); };
- const navigate = (next: View) => { setView(next); location.hash = next; };
- const changeScenario = (next: Scenario) => { setScenario(next); setTick(0); setAcknowledged({}); };
- const resetDemo = () => { setTick(0); setScenario('normal'); setAcknowledged({}); setPaused(false); };
- const lastUpdate = snapshot ? new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(snapshot.observedAt)) : '—';
-
- const visibleBuses = snapshot?.buses.filter(bus => operatorFilter === 'all' || snapshot.lines.find(candidate => candidate.id === bus.lineId)?.name === operatorFilter) ?? [];
- const visibleAlerts = snapshot?.alerts.filter(alert => operatorFilter === 'all' || snapshot.lines.find(candidate => candidate.id === alert.lineId)?.name === operatorFilter) ?? [];
- const visibleLines = snapshot?.lines.filter(candidate => operatorFilter === 'all' || candidate.name === operatorFilter) ?? [];
- const waitingTotal = [...new Map(visibleLines.flatMap(candidate => candidate.stops).map(stop => [stop.id, stop.waiting])).values()].reduce((sum, waiting) => sum + waiting, 0);
- const averageOccupancy = visibleBuses.length ? Math.round(visibleBuses.reduce((sum, bus) => sum + (occupancy(bus) ?? 0), 0) / visibleBuses.length) : null;
- const arrivals = snapshot?.buses.filter(bus => bus.lineId === lineId).map(bus => ({
-  bus, prediction: snapshot.predictions[bus.id]?.find(prediction => prediction.stopId === start?.id)
- })).sort((a, b) => (a.prediction?.etaMinutes ?? Infinity) - (b.prediction?.etaMinutes ?? Infinity)) ?? [];
- const routeForecast = snapshot && arrivals.find(arrival => arrival.prediction) ? snapshot.predictions[arrivals.find(arrival => arrival.prediction)!.bus.id] : [];
-
- return <div className="app">
-  <aside className="sidebar">
-   <a href="#citizens" className="brand" aria-label="Transit home" onClick={() => navigate('citizens')}><span className="brand-mark"><Icon name="bus" size={26}/></span><span>transit<span className="brand-sub">TORINO MOBILITY</span></span><span className="brand-dot">.</span></a>
-   <div className="sidebar-label">WORKSPACE</div>
-   <nav className="workspace-nav" aria-label="Select interface">
-    <button className={view === 'citizens' ? 'active' : ''} onClick={() => navigate('citizens')}><Icon name="map"/><span>Passenger app</span><Icon name="arrow" size={16}/></button>
-    <button className={view === 'operators' ? 'active' : ''} onClick={() => navigate('operators')}><Icon name="trend"/><span>Control room</span><Icon name="arrow" size={16}/></button>
-   </nav>
-   <div className="sidebar-note"><span className="small-caps">BUILT FOR THE CITY</span><h3>A clearer picture<br/>of every journey.</h3><p>People at stops. Space on buses. A network that makes sense.</p><div className="route-mini"><span>18</span><i/><span>68</span></div></div>
-   <div className="sidebar-footer"><span className="demo-tag">HACKATHON PROTOTYPE</span><p>Real public route geography.<br/>Simulated transit activity.</p></div>
-  </aside>
-
-  <main>
-   <header className="topbar"><span><span className="location-dot"/>Turin, Italy <span className="topbar-divider">/</span> {view === 'citizens' ? 'Your journey' : 'Network operations'}</span><div className="topbar-status"><span className="live-dot"/>{paused ? 'Simulation paused' : 'Simulation running'}<span className="avatar">TO</span></div></header>
-   <div className="page">
-    <div className="page-heading"><div><span className="eyebrow">{view === 'citizens' ? 'MOVE WITH CONFIDENCE' : 'TRANSPORT OPERATIONS'}</span><h1>{view === 'citizens' ? 'Know before you go.' : 'See the pressure. Take action.'}</h1><p>{view === 'citizens' ? 'Explore your route and see how busy your next bus could be.' : 'A shared view of capacity, waiting crowds, and the stops that need attention.'}</p></div><div className="update-label"><Icon name="clock" size={16}/><span>Updated {lastUpdate}<small>Europe/Rome · mock observations</small></span></div></div>
-
-    <div className="simulation-bar"><span className="simulation-title"><span className="demo-badge">DEMO</span>Scenario</span><div className="scenario-buttons" aria-label="Simulation scenario">{(Object.keys(scenarios) as Scenario[]).map(key => <button key={key} aria-pressed={scenario === key} className={scenario === key ? 'selected' : ''} onClick={() => changeScenario(key)}>{scenarios[key]}</button>)}</div><div className="simulation-actions"><button onClick={() => setPaused(value => !value)}>{paused ? 'Resume' : 'Pause'}</button><button onClick={resetDemo}>Reset</button></div></div>
-    {error && <div className="error-message" role="alert">{error}<button onClick={() => setTick(value => value + 1)}>Retry</button></div>}
-    {!snapshot && !error && <div className="loading-message" role="status">Loading route geometry…</div>}
-
-    {snapshot && line && view === 'citizens' && <>
-     <div className="citizen-layout">
-      <section className="journey-panel panel">
-       <div className="panel-title"><h2>Your route</h2><span className="subtle-badge">No transfers</span></div>
-       <span className="field-label">Bus line</span>
-       <div className="line-buttons">{['18', '68'].map(name => <button key={name} className={line.name === name ? 'selected' : ''} onClick={() => selectLine(snapshot.lines.find(candidate => candidate.name === name && candidate.direction === '0')!.id)}><span className={'line-chip line-' + name}>{name}</span><span>Line {name}</span></button>)}</div>
-       <label className="field-label" htmlFor="direction">Direction</label>
-       <select id="direction" value={lineId} onChange={event => selectLine(event.target.value)}>{snapshot.lines.filter(candidate => candidate.name === line.name).map(candidate => <option key={candidate.id} value={candidate.id}>To {candidate.headsign}</option>)}</select>
-       <div className="journey-inputs">
-        <div className="journey-endpoint"><span className="endpoint-dot start"/><div><label htmlFor="origin">Simulated starting position</label><select id="origin" value={originPreset} onChange={event => { setOriginPreset(Number(event.target.value)); setDestination(''); }}><option value={8}>Near the beginning of this direction</option><option value={20}>Near the middle of this direction</option><option value={34}>Near the end of this direction</option></select><small>{start ? shortStop(start.name) : '—'} · {start && origin ? Math.round(distanceMeters(start, origin)) : 0} m to nearest stop</small></div></div>
-        <div className="journey-endpoint"><span className="endpoint-dot end"/><div><label htmlFor="destination">Where are you going?</label><select id="destination" value={destination} onChange={event => setDestination(event.target.value)}>{line.stops.map((stop, index) => <option key={stop.id + '-' + index} value={stop.id} disabled={index <= startIndex}>{shortStop(stop.name)}</option>)}</select></div></div>
-       </div>
-       {!route.length && <p className="route-error">This destination is not reachable from the nearest stop in this direction. Choose a later stop or another simulated starting position.</p>}
-       {route.length > 0 && <><div className="route-summary"><span className={'line-chip line-' + line.name}>{line.name}</span><div><strong>{route.length - 1} stops on your journey</strong><small>Forecasts for the next bus · simulated</small></div></div><div className="stop-timeline">{route.map((stop, index) => {
-        const forecast = routeForecast.find(prediction => prediction.stopId === stop.id);
-        return <button key={stop.id + '-' + index} onClick={() => selectStop(lineId, stop.id)} className={'timeline-stop ' + (index === 0 || index === route.length - 1 ? 'endpoint' : '')}><span className="timeline-dot"/><span><strong>{shortStop(stop.name)}</strong><small>{index === 0 ? 'Your initial stop' : index === route.length - 1 ? 'Your destination' : 'On your route'}</small><small className="stop-forecast">{forecast ? Math.round(forecast.people / forecast.capacity * 100) + '% bus occupancy · predicted' : 'Bus prediction unavailable'}</small></span><span className={'waiting-count ' + (stop.waiting >= 40 ? 'busy' : '')}>{stop.waiting}<small>waiting</small></span></button>;
-       })}</div></>}
-       <div className="source-note"><Icon name="pin" size={14}/><span>Real stops and routes. All activity is simulated.</span></div>
-      </section>
-      <section className="map-panel panel"><MapView lines={snapshot.lines} buses={snapshot.buses} selectedLine={lineId} selectedStop={destination} origin={origin} onStop={selectStop}/></section>
-     </div>
-     <section className="arrivals-section"><div className="section-heading"><div><h2>Your buses, at a glance</h2><p>Arrivals at {start ? shortStop(start.name) : 'your initial stop'} · illustrative ETA and occupancy</p></div><span className="subtle-badge">{arrivals.length} simulated {arrivals.length === 1 ? 'vehicle' : 'vehicles'} in this direction</span></div><div className="bus-grid">{arrivals.map(({ bus, prediction }) => {
-      const predictedPercent = prediction ? Math.round(prediction.people / prediction.capacity * 100) : null;
-      return <article key={bus.id} className="bus-card panel"><div className="bus-card-top"><span className={'line-chip line-' + line.name}>{line.name}</span><div><strong>{bus.id}</strong><small>To {line.headsign}</small></div><span className="eta">{prediction ? prediction.etaMinutes : '—'}<small>{prediction ? 'min · mock ETA' : 'start already passed'}</small></span></div><div className="bus-card-occupancy"><span>Onboard now</span><strong>{bus.people}<small> / {bus.capacity}</small></strong></div><OccupancyBar bus={bus}/><div className="bus-detail"><span className={'status-pill ' + crowdClass(occupancy(bus))}>{crowdLabel(occupancy(bus))}</span><span>{remainingCapacity(bus)} places in total capacity</span></div><div className="forecast-row"><Icon name="trend" size={16}/><span>At your initial stop</span><strong>{predictedPercent === null ? 'Unavailable' : predictedPercent + '% predicted'}</strong></div><p className="seat-note">{bus.seats} seats · total count does not reveal free seats</p></article>;
-     })}{!arrivals.length && <div className="empty-state panel"><Icon name="bus" size={28}/><h3>No simulated buses in this direction</h3><p>The demo fleet runs toward {snapshot.lines.find(candidate => candidate.name === line.name && candidate.direction === '0')?.headsign}. Choose that direction to inspect vehicles.</p></div>}</div></section>
-    </>}
-
-    {snapshot && view === 'operators' && <>
-     <div className="operator-toolbar"><div className="tab-buttons" aria-label="Operator view">{(['alerts', 'analytics', 'map'] as OperatorTab[]).map(value => <button key={value} aria-pressed={tab === value} className={tab === value ? 'selected' : ''} onClick={() => setTab(value)}><Icon name={value === 'alerts' ? 'alert' : value === 'analytics' ? 'trend' : 'map'} size={17}/>{value === 'alerts' ? 'Action center' : value === 'analytics' ? 'Analytics' : 'Network map'}</button>)}</div><label className="filter-label">Network<select value={operatorFilter} onChange={event => setOperatorFilter(event.target.value)}><option value="all">All lines</option><option value="18">Line 18</option><option value="68">Line 68</option></select></label></div>
-     <div className="metric-grid"><Metric icon="alert" label="Active capacity concerns" value={visibleAlerts.length} note={visibleAlerts.filter(alert => !acknowledged[alert.id]).length + ' awaiting acknowledgement'} tone={visibleAlerts.length ? 'attention' : ''}/><Metric icon="bus" label="Vehicles in service" value={visibleBuses.length} note="18: two buses · 68: one bus"/><Metric icon="people" label="People at monitored stops" value={waitingTotal.toLocaleString('en-GB')} note="Current snapshot · distinct stop IDs"/><Metric icon="trend" label="Average bus occupancy" value={averageOccupancy === null ? '—' : averageOccupancy + '%'} note="Relative to total capacity"/></div>
-     {tab === 'alerts' && <div className="operations-layout"><section className="panel action-panel"><div className="panel-title"><div><h2>Stops that need attention</h2><p>Current waiting demand versus capacity on approaching buses.</p></div><span className="subtle-badge">Mock rule output</span></div>{visibleAlerts.length ? <div className="alert-list">{visibleAlerts.map(alert => {
-      const alertLine = snapshot.lines.find(candidate => candidate.id === alert.lineId)!;
-      return <article key={alert.id} className={'alert-card ' + alert.severity}><div className="alert-top"><span className={'status-pill ' + (alert.severity === 'critical' ? 'danger' : 'warning')}><Icon name="alert" size={13}/>{alert.severity === 'critical' ? 'Capacity pressure' : 'Watch this stop'}</span><span className={'line-chip line-' + alertLine.name}>{alertLine.name}</span></div><h3>{shortStop(alert.stopName)}</h3><p>{alert.waiting} people waiting. {alert.busId} has an estimated {alert.available} places available.</p><div className="alert-numbers"><strong>{alert.excess}<small>potentially without space</small></strong><span>Consider an additional service.<small>Current counts; alighting and passengers’ intended lines are unknown.</small></span></div><div className="alert-footer"><button className={acknowledged[alert.id] ? 'acknowledged' : 'primary-button'} disabled={!!acknowledged[alert.id]} onClick={() => setAcknowledged(current => ({ ...current, [alert.id]: true }))}><Icon name="check" size={15}/>{acknowledged[alert.id] ? 'Acknowledged in demo' : 'Acknowledge'}</button><button className="text-button" onClick={() => { setLineId(alert.lineId); setDestination(alert.stopId); setTab('map'); }}>View on map <Icon name="arrow" size={14}/></button></div></article>;
-     })}</div> : <div className="all-clear"><span><Icon name="check" size={30}/></span><h3>Room to keep moving.</h3><p>No current capacity concerns in this scenario.<br/>Switch to Overcrowding to demonstrate an alert.</p><button className="text-button" onClick={() => setTab('analytics')}>Explore the historical picture <Icon name="arrow" size={15}/></button></div>}</section><aside className="panel fleet-panel"><div className="panel-title"><h2>Fleet snapshot</h2><Icon name="bus" size={20}/></div>{visibleBuses.map(bus => {
-      const busLine = snapshot.lines.find(candidate => candidate.id === bus.lineId)!;
-      return <button key={bus.id} className="fleet-row" onClick={() => { setLineId(bus.lineId); setDestination(busLine.stops[bus.nextStopIndex].id); setTab('map'); }}><div><span className={'line-chip line-' + busLine.name}>{busLine.name}</span><strong>{bus.id}</strong><span className={'status-pill ' + crowdClass(occupancy(bus))}>{occupancy(bus)}%</span></div><OccupancyBar bus={bus}/><small>Next: {shortStop(busLine.stops[bus.nextStopIndex].name)}</small></button>;
-     })}<div className="integration-note"><span className="small-caps">BACKEND INTEGRATION</span><p>APC events, stop observations, forecasts, and operational alerts will come from the central server. This view currently uses demo fixtures.</p></div></aside></div>}
-     {tab === 'analytics' && <><section className="panel analytics-panel"><div className="panel-title"><div><h2>A week in the city</h2><p>Synthetic historical network occupancy · independent of the live scenario and line filter</p></div><div className="period-buttons"><button className={period === 'day' ? 'selected' : ''} onClick={() => setPeriod('day')}>Typical day</button><button className={period === 'week' ? 'selected' : ''} onClick={() => setPeriod('week')}>7 days</button></div></div><Chart points={period === 'day' ? snapshot.hourly : snapshot.weekly}/><div className="chart-footnote"><span><i/>Average total-capacity occupancy (%)</span><span>Illustrative historical series · simulated passenger counts</span></div></section><section className="panel table-panel"><div className="panel-title"><h2>Route overview</h2><span className="subtle-badge">Route dataset · 2026-10-09</span></div><div className="table-scroll"><table><thead><tr><th>Line</th><th>Direction</th><th>Stops</th><th>Demo buses</th><th>Average occupancy</th></tr></thead><tbody>{visibleLines.map(candidate => {
-      const fleet = snapshot.buses.filter(bus => bus.lineId === candidate.id);
-      return <tr key={candidate.id}><td><span className={'line-chip line-' + candidate.name}>{candidate.name}</span></td><td>{candidate.headsign}</td><td>{candidate.stops.length}</td><td>{fleet.length}</td><td>{fleet.length ? Math.round(fleet.reduce((sum, bus) => sum + (occupancy(bus) ?? 0), 0) / fleet.length) + '%' : 'No simulated service'}</td></tr>;
-     })}</tbody></table></div></section></>}
-     {tab === 'map' && <section className="panel operator-map-panel"><div className="panel-title"><div><h2>The network in context</h2><p>Select a direction and inspect its bus and stop activity.</p></div><select aria-label="Map line and direction" value={visibleLines.some(candidate => candidate.id === lineId) ? lineId : visibleLines[0]?.id} onChange={event => setLineId(event.target.value)}>{visibleLines.map(candidate => <option key={candidate.id} value={candidate.id}>Line {candidate.name} · {candidate.headsign}</option>)}</select></div><MapView lines={visibleLines} buses={visibleBuses} selectedLine={visibleLines.some(candidate => candidate.id === lineId) ? lineId : visibleLines[0]?.id ?? ''} selectedStop={destination} onStop={selectStop}/></section>}
-    </>}
-    <footer className="page-footer"><span>Transit / Bus Crowding Monitor</span><span>Hackathon prototype · observed activity and predictions are simulated</span><a href="https://www.gtt.to.it/open_data/gtt_gtfs.zip" target="_blank" rel="noreferrer">Public route data ↗</a></footer>
-   </div>
-  </main>
- </div>;
+  if (!network) return;
+  setError(''); setSnapshot(null); setModel(null); setAcknowledged([]); adapter.current = null;
+  const start = (ready: Model) => { cache.current.set(scenario, ready); setModel(ready); adapter.current = new DemoAdapter(network, ready, scenario); setSnapshot(adapter.current.read()); setProgress(''); };
+  const existing = cache.current.get(scenario); if (existing) { start(existing); return; }
+  setProgress('Preparing three independent synthetic weeks…');
+  const worker = new Worker(new URL('./model.worker.ts', import.meta.url), { type: 'module' });
+  worker.onmessage = e => { if (e.data.type === 'progress') setProgress(e.data.message); if (e.data.type === 'ready') { start(e.data.model); worker.terminate(); } if (e.data.type === 'error') { setError(e.data.message); worker.terminate(); } };
+  worker.onerror = e => { setError(e.message || 'Model preparation failed.'); worker.terminate(); };
+  worker.postMessage({ network, scenario }); return () => worker.terminate();
+ }, [network, scenario, retry]);
+ useEffect(() => { if (paused || !model) return; const timer = window.setInterval(() => { if (adapter.current) setSnapshot(adapter.current.advance()); }, 5000); return () => clearInterval(timer); }, [paused, model]);
+ useEffect(() => { if (snapshot) setAcknowledged(ids => ids.filter(id => snapshot.alerts.some(a => a.id === id))); }, [snapshot]);
+ const line = snapshot?.lines.find(l => l.id === lineId);
+ const selectLine = (id: string) => { setLineId(id); const next = network?.lines.find(l => l.id === id); if (!next) return; const start = next.stops.findIndex(s => s.id === '3380'); const i = start >= 0 ? start : 8; setOrigin(next.stops[i].id); setDestination(next.stops[Math.min(i + 6, next.stops.length - 1)].id); setSelectedStop(next.stops[i].id); };
+ const arrivals = snapshot ? compatibleArrivals(snapshot, origin, destination) : [];
+ const leastBusy = [...arrivals].sort((a, b) => a.prediction.people / a.prediction.capacity - b.prediction.people / b.prediction.capacity || a.prediction.etaMinutes - b.prediction.etaMinutes)[0]?.bus.id;
+ const inspected = snapshot?.stops.find(s => s.id === selectedStop);
+ const reset = () => { if (network && model) { adapter.current = new DemoAdapter(network, model, scenario); setSnapshot(adapter.current.read()); setAcknowledged([]); setPaused(false); } };
+ const stale = snapshot?.stops.filter(s => !fresh(s, snapshot.observedAt)).length ?? 0;
+ const originIndex = line?.stops.findIndex(s => s.id === origin) ?? -1;
+ const navigate = (next: 'citizens' | 'operators') => { setView(next); location.hash = next === 'operators' ? '#operators' : '#citizens'; };
+ return <div className="app"><aside className="sidebar"><a className="brand" href="#citizens" onClick={() => navigate('citizens')}><span className="brand-mark">↗</span><span>transit<span className="brand-sub">TORINO MOBILITY</span></span><span className="brand-dot">.</span></a><div className="sidebar-label">WORKSPACE</div><nav className="workspace-nav" aria-label="Select interface"><button className={view === 'citizens' ? 'active' : ''} onClick={() => navigate('citizens')}>Passenger app</button><button className={view === 'operators' ? 'active' : ''} onClick={() => navigate('operators')}>Control room</button></nav><div className="sidebar-note"><span className="small-caps">OBSERVE. ANTICIPATE.</span><h3>One city.<br/>A clearer journey.</h3><p>Live counts and historical patterns, working together.</p><div className="route-mini"><span>33</span><i/><span>42</span></div></div><div className="sidebar-footer"><span className="demo-tag">FRONTEND V2 · DEMO</span><p>Public route geometry.<br/>Synthetic observations and predictions.</p></div></aside><main><header className="topbar"><span><span className="location-dot"/>Turin / {view === 'citizens' ? 'Your journey' : 'Network operations'}</span><span>{snapshot ? time(snapshot.observedAt) : 'Preparing…'} · simulated clock</span></header><div className="page"><div className="page-heading"><div><span className="eyebrow">{view === 'citizens' ? 'MOVE WITH CONFIDENCE' : 'UNDERSTAND THE PRESSURE'}</span><h1>{view === 'citizens' ? 'A little foresight. A better ride.' : 'See today. Learn for tomorrow.'}</h1><p>{view === 'citizens' ? 'Compare your next buses and see how the crowd could change.' : 'Current demand, forecast pressure and historical service quality.'}</p></div><span className="subtle-badge">4 lines · 5 buses · shared stops</span></div>
+ <div className="simulation-bar"><span className="demo-badge">SIMULATED</span><div className="scenario-buttons">{(Object.keys(scenarioNames) as Scenario[]).map(s => <button key={s} aria-pressed={scenario === s} className={scenario === s ? 'selected' : ''} onClick={() => setScenario(s)}>{scenarioNames[s]}</button>)}</div><div className="simulation-actions"><button disabled={!snapshot} onClick={() => setPaused(p => !p)}>{paused ? 'Resume' : 'Pause'}</button><button disabled={!snapshot} onClick={reset}>Reset</button></div></div>
+ {error && <div className="error-message" role="alert">{error}<button onClick={() => setRetry(n => n + 1)}>Retry</button></div>}
+ {!snapshot && !error && <div className="loading-message" role="status"><strong>Preparing measured demo forecasts</strong><p>{progress}</p><small>Seven days for learning, seven for calibration, seven for independent evaluation. Usually 10–20 seconds; cached for this tab.</small></div>}
+ {snapshot && network && model && line && <>
+ {view === 'operators' && <><div className="operator-toolbar"><div className="tab-buttons">{(['map', 'alerts', 'history'] as const).map(t => <button key={t} className={operatorTab === t ? 'selected' : ''} aria-pressed={operatorTab === t} onClick={() => setOperatorTab(t)}>{t === 'map' ? 'Network maps' : t === 'alerts' ? 'Action center' : 'History & quality'}</button>)}</div></div><div className="metric-grid"><Metric label="Vehicles in service" value={snapshot.buses.length} note="18 × 2 · 68 × 1 · 33 × 1 · 42 × 1"/><Metric label="People at recently observed stops" value={snapshot.stops.filter(s => fresh(s, snapshot.observedAt)).reduce((n, s) => n + s.waiting!, 0).toLocaleString()} note="Unique stop IDs; stale readings excluded"/><Metric label="Possible capacity concerns" value={snapshot.alerts.length} note="One concern per stop; intended lines unknown"/><Metric label="Stale / missing stops" value={stale} note="Older than two simulated minutes"/></div></>}
+ {(view === 'citizens' || operatorTab === 'map') && <>
+ <div className="citizen-layout"><section className="journey-panel panel"><div className="panel-title"><h2>{view === 'citizens' ? 'Your journey' : 'Inspect the network'}</h2><span className="subtle-badge">All lines visible</span></div><label className="field-label" htmlFor="line">Line & direction</label><select id="line" value={lineId} onChange={e => selectLine(e.target.value)}>{snapshot.lines.map(l => <option key={l.id} value={l.id}>{l.name} → {l.headsign}</option>)}</select><div className="journey-inputs"><label className="field-label" htmlFor="origin">Departure stop</label><select id="origin" value={origin} onChange={e => { const id = e.target.value; setOrigin(id); setSelectedStop(id); const i = line.stops.findIndex(s => s.id === id); if (line.stops.findIndex(s => s.id === destination) <= i) setDestination(line.stops[Math.min(i + 4, line.stops.length - 1)].id); }}>{line.stops.slice(0, -1).map(s => <option key={s.id} value={s.id}>{shortStop(s.name)}</option>)}</select><label className="field-label spaced" htmlFor="destination">Destination</label><select id="destination" value={destination} onChange={e => setDestination(e.target.value)}>{line.stops.map((s, i) => <option key={s.id} value={s.id} disabled={i <= originIndex}>{shortStop(s.name)}</option>)}</select></div><div className="route-summary"><span className={'line-chip line-' + line.name}>{line.name}</span><div><strong>No transfers</strong><small>Other lines included when they reach your destination</small></div></div><p className="explanation">Lines 33 and 42 share stops on their common corridor. One stop count feeds both predictions; each bus has its own occupancy.</p><label className="field-label spaced" htmlFor="inspect">Inspect any stop</label><select id="inspect" value={selectedStop} onChange={e => setSelectedStop(e.target.value)}>{snapshot.stops.map(s => <option key={s.id} value={s.id}>{shortStop(s.name)} · {s.id}</option>)}</select><div className="source-note">Select a map marker, use the keyboard or choose a stop above. All counts are synthetic.</div></section>
+ <section className="panel map-panel"><div className="map-toolbar"><div className="tab-buttons"><button className={mode === 'live' ? 'selected' : ''} aria-pressed={mode === 'live'} onClick={() => setMode('live')}>Live map</button><button className={mode === 'forecast' ? 'selected' : ''} aria-pressed={mode === 'forecast'} onClick={() => setMode('forecast')}>Forecast map</button></div>{mode === 'forecast' && <div className="period-buttons" aria-label="Forecast horizon">{HORIZONS.map(h => <button key={h} className={horizon === h ? 'selected' : ''} aria-pressed={horizon === h} onClick={() => setHorizon(h)}>+{h} min</button>)}</div>}</div><MapView network={network} snapshot={snapshot} selectedLine={lineId} selectedStop={selectedStop} mode={mode} horizon={horizon} onStop={setSelectedStop}/></section></div>
+ {inspected && <StopDetails stop={inspected} snapshot={snapshot}/>}
+ {view === 'citizens' && <section className="arrivals-section"><div className="section-heading"><div><h2>Your next options</h2><p>At {shortStop(line.stops.find(s => s.id === origin)!.name)} · only buses that also reach your destination</p></div><span className="subtle-badge">Compare time & crowding</span></div><div className="bus-grid">{arrivals.map(({ bus, line: busLine, prediction }, index) => <article className="panel bus-card" key={bus.id}><div className="bus-card-top"><span className={'line-chip line-' + busLine.name}>{busLine.name}</span><div><strong>{bus.id}</strong><small>To {busLine.headsign}</small></div><span className="eta">{Math.ceil(prediction.etaMinutes)}<small>min · estimated</small></span></div><div className="recommendation-tags">{index === 0 && <span className="subtle-badge">Soonest arrival</span>}{bus.id === leastBusy && <span className="subtle-badge">Least crowded option</span>}</div><div className="bus-card-occupancy"><span>Latest onboard count</span><strong>{bus.people}<small> / {bus.capacity}</small></strong></div><div className="occupancy-track"><div className={crowdClass(occupancy(bus))} style={{ width: `${occupancy(bus)}%` }}/><span className="seat-threshold" style={{ left: `${bus.seats / bus.capacity * 100}%` }}/></div><div className="forecast-row"><span>Predicted on arrival</span><strong>≈{prediction.people} people · {Math.round(prediction.people / prediction.capacity * 100)}%</strong></div><p className="seat-note">Arrival reliability: {prediction.reliability?.percent == null ? 'not calibrated at this exact ETA' : `${prediction.reliability.percent}% on synthetic data`}. {bus.seats} seats; free seats cannot be inferred.</p><details><summary>How occupancy could change</summary><div className="forecast-grid compact">{HORIZONS.map(h => { const people = busPeopleAt(bus, h, network, model, snapshot.stops); return <article key={h}><span>+{h} min</span><strong>≈{people}</strong><Confidence value={reliability(model, 'bus', h, category(people, bus.capacity))}/></article>; })}</div><ol className="bus-route-forecast">{snapshot.predictions[bus.id].filter(p => p.etaMinutes <= 15).map(p => <li key={p.stopId}>{shortStop(snapshot.stops.find(s => s.id === p.stopId)!.name)}: ≈{p.people} onboard at arrival</li>)}</ol></details></article>)}{!arrivals.length && <div className="empty-state panel"><h3>No compatible simulated arrival</h3><p>The buses may have passed your departure stop, or this direction has no simulated service. Choose another departure or reset the scenario.</p></div>}</div><p className="explanation">These labels compare the displayed buses. They are not guarantees of boarding, seating or arrival time.</p></section>}
+ </>}
+ {view === 'operators' && operatorTab === 'alerts' && <div className="operations-layout"><section className="panel action-panel"><div className="panel-title"><div><h2>Potential capacity pressure</h2><p>Waiting counts compared with combined predicted space on buses arriving within ten minutes.</p></div></div>{snapshot.alerts.length ? snapshot.alerts.map(a => <article className={'alert-card ' + a.severity} key={a.id}><h3>{shortStop(a.stopName)}</h3><p>{a.waiting} people observed · approximately {a.available} places on approaching buses · {a.excess} people potentially without space.</p><p className="explanation">Intended lines and actual alighting are unknown. This is a capacity concern, not measured abandonment.</p><div className="alert-footer"><button className="primary-button" disabled={acknowledged.includes(a.id)} onClick={() => setAcknowledged(ids => [...ids, a.id])}>{acknowledged.includes(a.id) ? 'Acknowledged in this session' : 'Acknowledge'}</button><button className="text-button" onClick={() => { setSelectedStop(a.stopId); setOperatorTab('map'); }}>Inspect stop →</button></div></article>) : <div className="all-clear"><h3>No current capacity concern.</h3><p>Readings and forecasts update as simulated buses move.</p></div>}</section><aside className="panel fleet-panel"><div className="panel-title"><h2>Latest departures</h2></div>{snapshot.events.map((e, i) => <p className="departure-event" key={i}>{e}</p>)}{!snapshot.events.length && <p className="explanation">Waiting for the first simulated departure.</p>}<p className="explanation">One update every 5 seconds advances the clock by 30 seconds. Acknowledgements are local to this tab.</p></aside></div>}
+ {view === 'operators' && operatorTab === 'history' && <Analytics model={model} snapshot={snapshot}/>}
+ </>}
+ <footer className="page-footer"><span>Transit / Bus Crowding Monitor v2</span><span>Synthetic demo · independent project · no field validation</span><a href="https://www.gtt.to.it/open_data/gtt_gtfs.zip" target="_blank" rel="noreferrer">Public route source ↗</a></footer></div></main></div>;
 }

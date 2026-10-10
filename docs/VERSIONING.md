@@ -1,0 +1,22 @@
+# Versioning and integration
+
+## Preserved baseline
+
+`frontend` remains at `596f559085c134f471c79c26be38c877b0738751`, the initial three-bus demo. `frontend-v2` was created from that exact commit. `integration` was created from main commit `804bba0aea5ff4595c6b51cf92a172c92424ede3`.
+
+To inspect the baseline without changing an existing checkout, clone the repository into a separate directory and check out `frontend`, or create a new branch from the baseline SHA. Follow the baseline's own frontend README. Dependencies are pinned by its lockfile; external map tiles/fonts still require their providers.
+
+The planned `v0.1.0-demo` tag and "Initial frontend demo" release are pending, not created. Once available, create them targeting the exact baseline SHA (or the still-frozen `frontend` branch). Include launch instructions and a note that this is a frontend-only synthetic demo. Do not target main by default.
+
+## Workflow
+
+Current status: frontend v2 is the active standalone deliverable. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
+
+1. Commit v2 work on `frontend-v2`, preserving the baseline branch.
+2. Open component PRs targeting `integration`, in order: frontend-v2, backend, Arduino.
+3. Review differences and merge using merge commits. Resolve shared documentation semantically; never discard an entire colleague branch to resolve a conflict.
+4. Develop integration adapters on a branch from integration and merge through a PR after tests.
+5. Only promote integration to main after the supported end-to-end paths pass, recording any hardware limitations.
+6. Publish `v0.2.0-integrated-demo` only after the milestone is actually verified. A repository merge alone does not establish runtime interoperability.
+
+No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-fetch branch heads immediately before merging/publishing to accommodate concurrent team changes. A PR is a proposed comparison; opening it does not modify its target.

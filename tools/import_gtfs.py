@@ -15,7 +15,7 @@ def extract(archive, output):
         def rows(name):
             return csv.DictReader(io.TextIOWrapper(feed.open(name), encoding="utf-8-sig"))
         metadata = next(rows("feed_info.txt"))
-        routes = {r["route_id"]: r for r in rows("routes.txt") if r["route_short_name"] in ("18", "68") and r["route_type"] == "3"}
+        routes = {r["route_id"]: r for r in rows("routes.txt") if r["route_short_name"] in ("18", "68", "33", "42") and r["route_type"] == "3"}
         stops = {r["stop_id"]: r for r in rows("stops.txt")}
         trips = {r["trip_id"]: r for r in rows("trips.txt") if r["route_id"] in routes}
         times = collections.defaultdict(list)
@@ -45,7 +45,7 @@ def extract(archive, output):
                 "id": route_id + "-" + direction, "routeId": route_id,
                 "name": route["route_short_name"], "description": route["route_long_name"],
                 "direction": direction, "headsign": trips[trip_id]["trip_headsign"],
-                "color": "#197d67" if route["route_short_name"] == "18" else "#546bc8",
+                "color": {"18": "#197d67", "68": "#546bc8", "33": "#bc6b24", "42": "#a04788"}[route["route_short_name"]],
                 "stops": [{"id": r["stop_id"], "name": stops[r["stop_id"]]["stop_name"],
                            "lat": float(stops[r["stop_id"]]["stop_lat"]), "lon": float(stops[r["stop_id"]]["stop_lon"])} for r in sequence],
                 "shape": [[lat, lon] for _, lat, lon in sorted(shapes[shape])]
