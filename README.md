@@ -7,6 +7,7 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 | Branch | Purpose |
 | --- | --- |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
+| `frontend-v2-clean-map` | Visual variant with compact colour markers and click-to-open details |
 | `frontend-v2` | Four-line, five-bus frontend with live/forecast maps and measured synthetic evaluation |
 | `backend` | Colleague's FastAPI server in `server/` |
 | `Arduino` | Colleague's UNO Q counting application in `arduino/` |
@@ -15,11 +16,19 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 The initial demo remains recoverable from its branch and exact commit. The planned `v0.1.0-demo` tag/release has not yet been created: the connected GitHub tool does not expose release/tag creation, and the available browser is signed out. Do not move the preserved branch or rewrite its history. See [versioning](docs/VERSIONING.md).
 
+## Clean-map variation
+
+The `frontend-v2-clean-map` branch preserves the original v2 and adds a quieter map. Bus markers show only the line number; stop markers are 10px dots with 24px interactive targets. Click, tap or keyboard activation opens counts, timestamps and forecast details. Stop details are not pre-opened on initial load. The original bus brand icon is restored and decorative 33/42 sidebar badges are removed.
+
+Bus details and passenger cards emphasize occupied **total-capacity percentage**; raw counts remain available in details. Map colours are green below 40%, yellow from 40% to below 60%, orange from 60% to below 85%, and red from 85%. Grey indicates old or missing observations. For stops these percentages use illustrative demo thresholds, not measured physical capacity. In forecast mode only stop colours become forecasts; buses retain their latest observations and current simulated positions. The visual bands do not change the three calibrated forecast categories or prediction model.
+
+Integration remains deferred.
+
 ## Frontend v2
 
 - **Live map:** all lines and directions visible; one marker per physical stop ID; latest observed stop counts and current simulated bus positions.
 - **Forecast map:** stop crowd forecasts at +5, +10 and +15 minutes, based on recent observations and synthetic historical patterns.
-- **Stop detail:** hover, keyboard focus, tap, or an accessible stop selector reveals observations, timestamps, forecasts and reliability.
+- **Stop detail:** click, keyboard activation, tap, or an accessible stop selector reveals observations, timestamps, forecasts and reliability.
 - **Passenger comparison:** highlight the soonest and least crowded bus among those serving both departure and destination in the correct direction. No automatic choice and no transfers.
 - **Operator-only history:** seven historical days, stop/line/direction/day filters, crowded stop-minutes, capacity-pressure estimates, missing/stale readings and model quality.
 - **Fleet:** two line 18 buses toward Piazza Sofia, one line 68 toward Via Cafasso, one line 33 toward Collegno and one line 42 toward Ospedale Martini. Return patterns are visible without a simulated fleet.
@@ -30,7 +39,7 @@ The initial demo remains recoverable from its branch and exact commit. The plann
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v2, then:
+# Check out frontend-v2-clean-map for this variation, then:
 cd frontend
 npm ci
 npm run dev

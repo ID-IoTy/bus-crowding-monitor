@@ -20,3 +20,7 @@ Current status: frontend v2 is the active standalone deliverable. Integration is
 6. Publish `v0.2.0-integrated-demo` only after the milestone is actually verified. A repository merge alone does not establish runtime interoperability.
 
 No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-fetch branch heads immediately before merging/publishing to accommodate concurrent team changes. A PR is a proposed comparison; opening it does not modify its target.
+
+## Visual variation
+
+`frontend-v2-clean-map` starts from completed v2 commit `b08777bb03a81dfe018ef76447e188fb846bc7ee`. It contains presentation refinements only; `frontend-v2` remains recoverable unchanged. Integration is still deferred.

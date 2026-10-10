@@ -43,3 +43,7 @@ Static GTFS 20261009, one common full pattern per direction of 18, 68, 33, 42. `
 Capacities and thresholds are illustrative. Free seats cannot be inferred. Forecast map changes stop counts only; bus markers retain current simulated positions. No transfers, walking directions, prediction of individual intentions, server persistence or field validation.
 
 See the root README and `docs/API_CONTRACT.md` for integration status.
+
+## Clean-map presentation variant
+
+Branch `frontend-v2-clean-map` keeps the v2 simulation and model unchanged. Map markers hide counts until activated: buses display route numbers and stops use small coloured dots. Popups support click, tap, Enter and Space; Escape closes them. Bus detail prioritizes total-capacity occupancy percentage, with raw counts as secondary detail. Green/yellow/orange/red use 40/60/85% boundaries; grey means older or missing readings. Stop colours use illustrative capacities. Calibrated three-category reliability is unchanged. The original bus brand icon is restored and the sidebar route badges are removed.
