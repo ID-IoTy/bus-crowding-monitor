@@ -227,6 +227,192 @@ curl -H "X-API-Key: dev-key" http://localhost:8000/stops/R1-S05/status
 
 ---
 
+## API & External Components
+
+This section gives the big-picture view of **who talks to the server and how**.
+Five external components interact with the central server, each using a specific
+set of endpoints, in a specific direction (data flowing IN to the server, or
+pulled OUT of it), at a specific cadence. The detailed request/response payloads
+live in the [API Reference](#api-reference) below; here we focus on the roles.
+
+### Overview diagram
+
+```mermaid
+graph LR
+    subgraph Field["Field hardware (Arduino, local WiFi)"]
+        BUSDEV["Bus APC unit"]
+        STOPDEV["Stop camera / sensor"]
+    end
+
+    subgraph Consumers["Software consumers"]
+        APP["Citizen mobile app"]
+        DISPLAY["Physical stop display"]
+        COMPANY["Transport company tooling"]
+        ALERTSVC["Future anomaly consumer service"]
+    end
+
+    SERVER["SmartBus Central Server"]
+    DB[("anomaly_queue table")]
+
+    BUSDEV -- "POST /ingest/bus-event (IN)" --> SERVER
+    STOPDEV -- "POST /ingest/stop-event (IN)" --> SERVER
+
+    SERVER -- "GET /stops/{id}/status (OUT)" --> APP
+    SERVER -- "GET /buses/{id}/route-forecast (OUT)" --> APP
+    SERVER -- "GET /stops/{id}/status (OUT)" --> DISPLAY
+    SERVER -- "GET /admin/anomalies (OUT)" --> COMPANY
+
+    SERVER -- "writes PENDING rows" --> DB
+    DB -. "polled later (OUT)" .-> ALERTSVC
+```
+
+### Component-by-component breakdown
+
+#### 1. Bus APC unit (Arduino on the vehicle)
+
+- **Role:** reports the Automatic Passenger Counting data every time the bus
+  closes its doors and leaves a stop.
+- **Direction:** data flows IN to the server (the device is a *producer*).
+- **Endpoint used:** `POST /ingest/bus-event`
+- **Cadence:** event-driven — one call per stop departure.
+- **Auth:** `X-API-Key` with the device key.
+- **What it carries:** which bus, which route, which stop, how many passengers
+  are now on board, door status, speed and GPS position. The onboard count is
+  the critical field: it lets the server compute how many people boarded or
+  alighted once it is cross-referenced with the stop's own counts.
+- **Server-side effect:** the event is stored, then the correlator looks for the
+  matching stop readings; if found, it produces a correlated record and runs the
+  overcrowding anomaly check.
+
+Example payload:
+
+```json
+{
+  "bus_id": "BUS-01",
+  "route_id": "R1",
+  "stop_id": "R1-S05",
+  "timestamp": "2024-01-15T08:32:00Z",
+  "passengers_onboard": 34,
+  "door_status": "closed",
+  "speed_kmh": 0,
+  "latitude": 45.0703,
+  "longitude": 7.6869
+}
+```
+
+#### 2. Stop camera / sensor (Arduino at the bus stop)
+
+- **Role:** counts how many people are physically waiting at the stop.
+- **Direction:** data flows IN to the server (*producer*).
+- **Endpoint used:** `POST /ingest/stop-event`
+- **Cadence:** two modes combined —
+  - **periodic:** every 60 seconds, as a heartbeat of the current crowd;
+  - **triggered:** a `pre_arrival` reading right before/as the bus arrives, and a
+    `post_departure` reading about 10 seconds after the bus leaves (once the
+    people who got off are out of frame).
+- **Auth:** `X-API-Key` with the device key.
+- **What it carries:** which stop, the exact number of people waiting, and the
+  `event_type` tag (`periodic` / `pre_arrival` / `post_departure`) that tells the
+  server how to use the reading.
+- **Server-side effect:** stored immediately. A `post_departure` reading is the
+  trigger that completes a correlation (crowd before vs after boarding). Every
+  reading also feeds the abnormal-crowd and abandonment anomaly checks.
+
+Example payload:
+
+```json
+{
+  "stop_id": "R1-S05",
+  "timestamp": "2024-01-15T08:32:10Z",
+  "people_waiting": 4,
+  "event_type": "post_departure"
+}
+```
+
+#### 3. Citizen mobile app
+
+- **Role:** lets a passenger see when the next buses arrive at their stop and how
+  crowded those buses will be — both on arrival and after the waiting crowd
+  boards.
+- **Direction:** data is pulled OUT of the server (the app is a *consumer*).
+- **Endpoints used:**
+  - `GET /stops/{stop_id}/status` — the main screen for a chosen stop.
+  - `GET /buses/{bus_id}/route-forecast` — the full occupancy curve of a bus
+    along its remaining route, for the "how will it fill up" view.
+- **Cadence:** on demand (when the user opens a stop) and/or light polling every
+  few seconds while the screen is open.
+- **Auth:** `X-API-Key` with the public app key.
+- **What it receives:** adjusted ETA next to the GTT baseline, predicted
+  occupancy percentage and a human label (LOW/MEDIUM/HIGH/FULL) for arrival and
+  departure, seats available, and the stop-by-stop forecast for the rest of the
+  trip.
+
+Example call:
+
+```bash
+curl -H "X-API-Key: dev-key" http://localhost:8000/stops/R1-S05/status
+```
+
+#### 4. Physical stop display
+
+- **Role:** the screen mounted at the bus stop itself, showing the same arrival
+  and crowdedness information to people who are already there.
+- **Direction:** data is pulled OUT of the server (*consumer*).
+- **Endpoint used:** `GET /stops/{stop_id}/status` (it is hard-wired to its own
+  stop ID).
+- **Cadence:** steady polling, typically every 10–30 seconds.
+- **Auth:** `X-API-Key` with the public app key.
+- **What it receives:** identical payload to the mobile app; the display just
+  renders the next-buses list and crowdedness labels. Reusing one endpoint keeps
+  the app and the display perfectly consistent.
+
+#### 5. Transport company tooling (operations / dispatch)
+
+- **Role:** lets the operator see anomalies the system has detected —
+  overcrowding, abnormal crowd build-up, abandonment — so they can react (send an
+  extra bus, investigate a delay, and so on).
+- **Direction:** data is pulled OUT of the server (*consumer*), with a stronger
+  credential.
+- **Endpoint used:** `GET /admin/anomalies` (filterable by `status`, paginated).
+- **Cadence:** on demand from a dashboard, or periodic polling by an ops tool.
+- **Auth:** `X-API-Key` with the **admin** key (the normal device/app key is
+  rejected with 401).
+- **What it receives:** the list of anomalies with type, severity, the involved
+  route/stop/bus, a human description, a structured `payload`, and the processing
+  `status`.
+
+Example call:
+
+```bash
+curl -H "X-API-Key: admin-key" "http://localhost:8000/admin/anomalies?status=PENDING"
+```
+
+#### 6. Future anomaly consumer service (not part of this project)
+
+- **Role:** a separate service that will act on anomalies automatically (e.g.
+  dispatch alerts via SMS/email, push to an operations system).
+- **Direction:** it does **not** call an HTTP endpoint on this server. Instead it
+  reads the `anomaly_queue` table directly, where the server writes every
+  anomaly with `status = "PENDING"`, and flips rows to `"PROCESSED"` once handled.
+- **Cadence:** its own polling loop (independent of the central server).
+- **Why this design:** the central server never needs to know what happens to an
+  alert. This outbox/queue pattern keeps the two systems loosely coupled, so the
+  consumer can be built, deployed and restarted without touching the server.
+
+### Quick reference matrix
+
+| Component | Endpoint(s) | Direction | Cadence | Auth key |
+|---|---|---|---|---|
+| Bus APC unit | `POST /ingest/bus-event` | IN | On each stop departure | device |
+| Stop camera/sensor | `POST /ingest/stop-event` | IN | Every 60s + on arrival/departure | device |
+| Citizen app | `GET /stops/{id}/status`, `GET /buses/{id}/route-forecast` | OUT | On demand / light polling | public |
+| Stop display | `GET /stops/{id}/status` | OUT | Polling 10–30s | public |
+| Company tooling | `GET /admin/anomalies` | OUT | On demand / polling | admin |
+| Anomaly consumer | reads `anomaly_queue` table | OUT (DB) | Own polling loop | n/a (DB access) |
+| Health probe | `GET /health` | OUT | As needed | none |
+
+---
+
 ## API Reference
 
 ### Authentication
