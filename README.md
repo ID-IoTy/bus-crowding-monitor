@@ -1,6 +1,6 @@
 # Bus Crowding Monitor
 
-A smart public transport prototype combining bus occupancy and stop crowd counts, with a passenger web app and an operator dashboard.
+An independent smart public transport prototype combining bus occupancy and stop crowd counts, with a passenger web app and an operator dashboard. Public route data is used as geographic reference; the transport operator is not a project partner.
 
 **Delivery target:** October 11, 2026, 16:00 Europe/Rome.  
 **Runtime:** localhost for the initial demo.  
@@ -11,7 +11,7 @@ A smart public transport prototype combining bus occupancy and stop crowd counts
 | Component | Owner | Status |
 | --- | --- | --- |
 | Central server, ingestion, correlation, predictions, and output APIs | Backend colleague | Specification agreed; implementation and API contracts to be supplied by the colleague |
-| Passenger web app and operator dashboard | Frontend workstream | Initial implementation in progress on the `frontend` branch, using explicitly labelled mock data |
+| Passenger web app and operator dashboard | Frontend workstream | First runnable mock prototype on the `frontend` branch; real backend integration pending |
 | Stop counting and device-side processing | Hardware colleague | Separate workstream using an Arduino UNO Q with 4 GB RAM |
 | Shared project documentation | Team | Maintained on `main` and kept aligned with implementation |
 
@@ -19,7 +19,8 @@ The project includes both frontend interfaces. The backend colleague's specifica
 
 ## Agreed demo scope
 
-- Two complete real GTT bus lines in Turin; treat each line independently, without transfers.
+- Public bus lines 18 and 68 in Turin, with one common complete pattern per direction; treat each line independently, without transfers.
+- Demo fleet: two buses on line 18 toward Piazza Sofia, and one on line 68 toward Via Cafasso.
 - A simulated or manually selected passenger origin.
 - The initial stop is the closest stop to that origin; the passenger selects the destination.
 - Display crowding along a valid same-line route in the appropriate direction.
@@ -207,7 +208,30 @@ Field validation is outside the hackathon schedule. Public datasets and papers m
 - Keep README status, verified startup commands, decisions, and limitations current with each milestone.
 - Preserve colleagues' files and commit focused changes.
 
-The frontend is being scaffolded under `frontend/`. Verified installation and startup commands will be documented when the first runnable version is completed.
+The first frontend prototype is available on the [`frontend` branch](https://github.com/ID-IoTy/bus-crowding-monitor/tree/frontend). It includes an interactive passenger map, journey selection, bus cards, operator alerts with local acknowledgement, historical charts, and a supporting network map.
+
+### Run the frontend
+
+Use the `frontend` branch. From its repository root:
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+- Passenger view: http://127.0.0.1:5173/#citizens
+- Operator view: http://127.0.0.1:5173/#operators
+- Checks: `npm test` and `npm run build`.
+- Prerequisite: Node.js 22.18+ or Node.js 24; verified with Node.js 24.14.
+
+See [frontend documentation](https://github.com/ID-IoTy/bus-crowding-monitor/blob/frontend/frontend/README.md) for setup, mock behavior, provenance, and the backend adapter.
+
+The imported public route fixture uses feed version `20261009`, with 50 stops in each line 18 direction, and 41/40 stops in the line 68 directions. The full archive is not committed. Real route geometry is bundled; map tiles and optional fonts require internet access.
+
+Both interfaces run in one application. Separate browser tabs have independent mock simulation state until connected to the backend. Alert acknowledgement is currently local; server persistence is pending.
+
+The historical fixture provides a typical day and seven daily summary points. It does not yet implement a database containing seven days of raw observations.
 
 ## Roadmap
 
@@ -215,9 +239,9 @@ The frontend is being scaffolded under `frontend/`. Verified installation and st
 - [x] Create the repository and confirm GitHub access.
 - [x] Create the independent `frontend` branch.
 - [x] Adopt the colleague's ingestion, correlation, and prediction specification.
-- [ ] Validate and import two complete GTT bus lines.
+- [x] Inspect the public route feed and import one full common pattern per direction of lines 18 and 68; public reuse terms still require confirmation.
 - [ ] Agree frontend/backend response contracts.
-- [ ] Deliver the initial passenger and operator interfaces with mocks.
+- [x] Deliver the initial passenger and operator interfaces with mocks.
 - [ ] Implement the central backend in the colleague's workstream.
 - [ ] Connect real backend responses and reconcile alert state.
 - [ ] Prepare historical charts, comparison scenarios, and the demo.
@@ -229,7 +253,7 @@ The frontend is being scaffolded under `frontend/`. Verified installation and st
 | --- | --- |
 | 2026-10-10 | Separate passenger and operator interfaces with a shared backend. |
 | 2026-10-10 | Python/FastAPI backend and React/TypeScript frontend. |
-| 2026-10-10 | Two complete real GTT lines, independently navigated without transfers. |
+| 2026-10-10 | Two complete real bus lines, independently navigated without transfers. |
 | 2026-10-10 | Simulated origin, nearest initial stop, selected destination, and route crowding. |
 | 2026-10-10 | Operator priorities: critical situations, acknowledgement, then analytics. |
 | 2026-10-10 | Controlled scenarios, seven synthetic historical days, and localhost delivery. |
@@ -237,10 +261,12 @@ The frontend is being scaffolded under `frontend/`. Verified installation and st
 | 2026-10-10 | Add APC departure events, timed stop observations, and visit correlation to the backend specification. |
 | 2026-10-10 | Add occupancy forecasts, adjusted ETA/dwell estimates, anomalies, and output for future stop displays. |
 | 2026-10-10 | Continue frontend independently using mocks; store frontend code on `frontend`, shared README on `main`. |
+| 2026-10-10 | Simulate two buses on line 18 in the same direction and one on line 68. |
+| 2026-10-10 | Import public route feed 20261009 and deliver the first runnable frontend with local scenario and alert controls. |
 
 ## Remaining decisions
 
-- Exact GTT lines, supported directions, and route variants.
+- Additional route variants and expanded network coverage.
 - APC payload availability and stop-event synchronization.
 - Baseline ETA source and how it already models dwell time.
 - API contracts, update cadence, freshness, and uncertainty representation.
