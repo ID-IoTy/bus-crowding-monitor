@@ -39,7 +39,6 @@ export default function JourneyMap({ network, option, origin, destination, selec
     path.push(geometry.point(to));
     const inside = !destination || (i >= option.originIndex && i < option.destinationIndex);
     L.polyline(path, { color: '#203c36', weight: inside ? 13 : 8, opacity: inside ? .75 : .12, interactive: false }).addTo(layers);
-    L.polyline(path, { color: '#ffffff', weight: inside ? 10 : 6, opacity: inside ? 1 : .35, interactive: false }).addTo(layers);
    }
    // Short adjacent strokes interpolate colours along the actual shape, not stop-to-stop chords.
    for (let i = 0; i < route.stops.length - 1; i++) {
@@ -52,7 +51,7 @@ export default function JourneyMap({ network, option, origin, destination, selec
      path.push(geometry.point(end));
      const value = a === null ? null : b === null ? a : a + (b - a) * j / parts;
      const inside = !destination || (i >= option.originIndex && i < option.destinationIndex);
-     L.polyline(path, { color: crowdColor(value), weight: inside ? 7 : 4, opacity: inside ? .95 : .25, interactive: false }).addTo(layers);
+     L.polyline(path, { color: crowdColor(value), weight: inside ? 10 : 6, opacity: inside ? 1 : .25, interactive: false }).addTo(layers);
     }
    }
    option.trips.forEach((trip, index) => {
@@ -63,7 +62,7 @@ export default function JourneyMap({ network, option, origin, destination, selec
     // Offset nearby labels, including services waiting at the same terminus.
     const point = m.latLngToLayerPoint([trip.position.lat, trip.position.lon]);
     const crowded = option.trips.some(other => other.id !== trip.id && point.distanceTo(m.latLngToLayerPoint([other.position.lat, other.position.lon])) < 80);
-    const marker = L.marker([trip.position.lat, trip.position.lon], { icon: L.divIcon({ html: element, className: 'journey-bus-marker', iconSize: [60, 34], iconAnchor: [30, 17 + (crowded ? index * 39 : 0)] }), title: `Line ${route.name}, option ${index + 1}, ${trip.positionKind}`, keyboard: true, zIndexOffset: selectedBus === trip.id ? 1500 : 1000 + index }).addTo(layers);
+    const marker = L.marker([trip.position.lat, trip.position.lon], { icon: L.divIcon({ html: element, className: 'journey-bus-marker', iconSize: [40, 26], iconAnchor: [20, 13 + (crowded ? index * 31 : 0)] }), title: `Line ${route.name}, option ${index + 1}, ${trip.positionKind}`, keyboard: true, zIndexOffset: selectedBus === trip.id ? 1500 : 1000 + index }).addTo(layers);
     marker.on('click', () => callbacks.current.onBus(trip.id));
     marker.getElement()?.setAttribute('role', 'button');
     marker.getElement()?.setAttribute('aria-label', `Line ${route.name}, option ${index + 1}, ${trip.positionKind}`);

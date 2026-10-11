@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Network, Scenario } from './types';
-import { compatibleRoutes, journeyOptions, parseRomeInput, romeInput, stopObservation, waitingForecast, type JourneyTrip } from './journey';
+import { compatibleRoutes, fillPercent, journeyOptions, parseRomeInput, romeInput, stopObservation, waitingForecast, type JourneyTrip } from './journey';
 import JourneyMap from './JourneyMap';
 import type { ReactNode } from 'react';
 
@@ -20,7 +20,8 @@ function StopSearch({ label, value, stops, onChange, excluded = '', optional = f
 }
 function BusDetails({ trip, originIndex, onClose }: { trip: JourneyTrip; originIndex: number; onClose: () => void }) {
  const p = trip.passages[originIndex];
- return <section className="inline-bus-details" aria-label="Selected bus details" aria-live="polite"><div className="inline-bus-metrics"><div><small>Currently on bus</small><strong>{trip.observed ? trip.observed.people : '—'}</strong><span>{trip.observed ? 'people · ' + displayTime(trip.observed.at) : 'No observation yet'}</span></div><div><small>Predicted after departure</small><strong>{p.leaving}</strong><span>people · {displayTime(p.departure)}</span></div><div><small>Percentage</small><strong>{p.percent === null ? '—' : p.percent + '%'}</strong><span>{p.percent === null ? 'Capacity unknown' : 'After departure'}</span></div></div><div className="inline-bus-footer"><small>{trip.capacity === null ? 'Capacity unknown' : trip.capacity + ' places assumed'} · Reliability unavailable</small><button className="text-button" onClick={onClose}>Close details</button></div>{p.leftBehind > 0 && <p className="boarding-warning">You may not be able to board.</p>}</section>;
+ const before = fillPercent(p.arriving, trip.capacity);
+ return <section className="inline-bus-details" aria-label="Selected bus details" aria-live="polite"><div className="inline-bus-metrics"><div><small>Before your stop</small><strong>{before === null ? '—' : before + '%'}</strong><span>Predicted on arrival · {displayTime(p.arrival)}</span></div><div><small>After your stop</small><strong>{p.percent === null ? '—' : p.percent + '%'}</strong><span>Predicted after departure · {displayTime(p.departure)}</span></div></div><div className="inline-bus-footer"><small>{trip.capacity === null ? 'Capacity unknown' : trip.capacity + ' places assumed'} · Reliability unavailable</small><button className="text-button" onClick={onClose}>Close details</button></div>{p.leftBehind > 0 && <p className="boarding-warning">You may not be able to board.</p>}</section>;
 }
 export default function PassengerJourney({ network, observedAt, scenario }: { network: Network; observedAt: string; scenario: Scenario }) {
  const [origin, setOrigin] = useState(''); const [destination, setDestination] = useState(''); const [dateTime, setDateTime] = useState('');
