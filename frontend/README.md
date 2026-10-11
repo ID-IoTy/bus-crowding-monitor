@@ -22,3 +22,5 @@ Service and historical data are synthetic. The demo assumes 70 total places, wit
 `npm test` runs 19 domain, journey and place-search tests, including preserved standalone-model tests. `npm run build` runs TypeScript checks and the production build. These do not replace full integrated browser or real-hardware acceptance. Generate API types from the repository root with `./scripts/gen-types.ps1`.
 
 Old standalone modules remain for tests and reference. Earlier delivered versions are preserved on their original GitHub branches; see `docs/VERSIONING.md` in the repository root.
+
+The control room now includes the backend-connected History & insights tab and shares the passenger workspace palette, rounded panels and responsive touch controls. Historical observation charts offer period, line/direction and stop filters; generated types include HistoryView. Calibrated forecast accuracy is still unavailable.
