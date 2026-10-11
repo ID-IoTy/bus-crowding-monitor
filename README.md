@@ -6,7 +6,8 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 | Branch | Purpose |
 | --- | --- |
-| `frontend-v3-responsive` | Current passenger iteration: rounded green workspace, desktop/tablet/mobile layouts and larger touch controls |
+| `frontend-v3-address-only` | Current passenger iteration: address/place search only, without a mode selector or introductory question |
+| `frontend-v3-responsive` | Preserved passenger iteration: rounded green workspace, desktop/tablet/mobile layouts and larger touch controls |
 | `frontend-v3-auto-stops` | Preserved passenger iteration: live place suggestions and automatic paired departure/arrival stop recommendations |
 | `frontend-v3-place-search` | Preserved passenger iteration: online address/place search suggests nearby compatible demo stops |
 | `frontend-v3-green-panel` | Preserved presentation: dark green backing behind the passenger logo and left controls, with unchanged journey behaviour |
@@ -54,6 +55,8 @@ The `frontend-v3-auto-stops` iteration makes **Addresses & places** the default.
 
 Place suggestions now appear after at least three characters and 500 ms without typing, with no Search button. Clearing or editing a chosen location invalidates the previous endpoint plan; obsolete requests are aborted or skipped before transmission. Cached results, per-tab serialization, 1.1-second request spacing, a 12-second timeout, Photon attribution and the runtime endpoint configuration remain. Queries are sent to Photon while typing; this is not Google Maps or a walking-route planner. Stops mode retains manual name/code search and map selection. Trip dates, crowd forecasts and backend integration are unchanged. On desktop windows at most 700 pixels high, compact fields keep the suggested-pair selector beside date/time and the three services visible. The prior manual nearby-stop flow is preserved at `4060eee2d7b35d0e4d9d57cc1ad96a801610e252`.
 
+The current `frontend-v3-address-only` iteration searches addresses and places exclusively. The Stops/Addresses mode switch and the “Where are you heading?” title have been removed. Automatic nearby stop-pair suggestions, the optional destination and date/time remain available. Map stop actions populate the location fields instead of switching to a separate stop-search mode. The previous responsive version remains preserved at `a36b4376d0c0f74cebbda6e4b90d5251cf9fa8ac`.
+
 The `frontend-v3-responsive` iteration replaces the fixed green strip with a rounded, content-sized passenger panel containing the original logo and search. Desktop windows from 980 px show controls and map side by side; tablets and phones stack them with normal vertical scrolling. Phone inputs use 16 px text and 44 px controls, and map markers have 44 px interaction areas while retaining compact visible symbols. **View map** and **Back to journey** provide mobile navigation. Short desktop windows use a compact two-column search; selected bus details expand inline. Loading and error states use centred cards without the split background. Predictions, geocoding, suggested stop pairs and operator functionality remain unchanged. The previous iteration is preserved at `e5ceb786857b9ea7f3c92662dc80ab4592bddeb9`. See [responsive UI verification](docs/UI_RESPONSIVE_REVIEW.md) for the checked sizes, screenshots and limitations.
 
 Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for the same inline observed count, after-departure estimate and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
@@ -89,7 +92,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v3-responsive for this iteration, then:
+# Check out frontend-v3-address-only for this iteration, then:
 cd frontend
 npm ci
 npm run dev

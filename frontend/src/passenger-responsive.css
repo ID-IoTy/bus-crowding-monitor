@@ -9,6 +9,8 @@
 .mobile-map-link{min-height:44px;padding:8px 14px;background:#254e44;color:#f3f7ee;border:1px solid #668579;border-radius:12px;font-size:13px}
 .app-passenger .journey-search{padding:16px;margin:0;border-radius:18px;z-index:1100}
 .app-passenger .journey-search .panel-title{margin-bottom:12px;align-items:center}
+.app-passenger .journey-search .panel-title{display:none}
+@media(min-width:980px){.app-passenger .has-selected-bus .journey-search .panel-title{display:flex}}
 .app-passenger .journey-search h2{font-size:18px;margin:0}
 .app-passenger .journey-search .eyebrow,.app-passenger .journey-search .subtle-badge{display:none}
 .app-passenger .journey-search-grid{grid-template-columns:minmax(0,1fr);gap:13px}
