@@ -8,6 +8,7 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 | --- | --- |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
 | `frontend-v3-journey` | Current stop-first passenger planner: optional destination/date, three scheduled services and after-departure forecasts |
+| `frontend-v3-side-map` | Current layout variation: journey search, cards and details on the left; persistent map on the right |
 | `frontend-v2-capacity-70` | Preserved clean-map iteration at `536b3d0022264125434b4603406282776bee7395` |
 | `frontend-v2-clean-map` | Visual variant with compact colour markers and click-to-open details |
 | `frontend-v2` | Four-line, five-bus frontend with live/forecast maps and measured synthetic evaluation |
@@ -21,6 +22,8 @@ The initial demo remains recoverable from its branch and exact commit. The plann
 ## Passenger journey iteration
 
 Choose a departure stop by name, code or zooming into the map. Destination is optional: when provided, only direct services reaching it after departure in the same direction appear. Date/time is optional and interpreted in Europe/Rome; **Now** uses the simulated clock. Future dates are supported. No transfers are planned.
+
+The `frontend-v3-side-map` variation places search, route options and selected bus/stop details in a left column, with a sticky map on the right. At viewport widths of 760px or less the columns stack vertically. The original `frontend-v3-journey` remains preserved at `5dda674b54e005ec369ab3754fcc974fef028a58`.
 
 Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for observed counts, arrival/departure estimates and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
 
@@ -55,7 +58,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v3-journey for this iteration, then:
+# Check out frontend-v3-side-map for this iteration, then:
 cd frontend
 npm ci
 npm run dev

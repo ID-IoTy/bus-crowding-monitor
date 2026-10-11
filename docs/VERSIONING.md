@@ -27,7 +27,7 @@ No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-
 
 ## Capacity iteration and recovery index
 
-The active iteration is `frontend-v3-journey`, created from capacity commit `536b3d0022264125434b4603406282776bee7395`. Earlier branches remain unchanged.
+The active layout iteration is `frontend-v3-side-map`, created from journey commit `5dda674b54e005ec369ab3754fcc974fef028a58`. Earlier branches remain unchanged.
 
 | Iteration | Preserved branch | Exact starting or completed commit |
 | --- | --- | --- |
@@ -35,7 +35,8 @@ The active iteration is `frontend-v3-journey`, created from capacity commit `536
 | Completed frontend v2 | `frontend-v2` | `b08777bb03a81dfe018ef76447e188fb846bc7ee` |
 | Compact map, 75 total / 32 seated | `frontend-v2-clean-map` | `c478f111c6ebfa97e8433676e4563ed022e7a0d4` |
 | Compact map, 70 total / 25 seated | `frontend-v2-capacity-70` | `536b3d0022264125434b4603406282776bee7395` |
-| Stop-first passenger planner | `frontend-v3-journey` | Starts at `536b3d0022264125434b4603406282776bee7395`; subsequent commits contain the planner |
+| Stop-first passenger planner | `frontend-v3-journey` | `5dda674b54e005ec369ab3754fcc974fef028a58` |
+| Passenger cards left, map right | `frontend-v3-side-map` | Starts at `5dda674b54e005ec369ab3754fcc974fef028a58` |
 
 For each future iteration, keep the last delivered branch frozen and create a new working branch from its verified head. Record the source SHA and the change here. Recover a previous iteration in a separate clone using `git switch --detach <exact-commit-sha>`, or create a new branch from that SHA. Use that iteration's lockfile and README; do not reset or force-push a shared branch. Integration remains deferred.
 
