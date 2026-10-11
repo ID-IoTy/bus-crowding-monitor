@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People Counter - Arduino UNO Q</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👥 People Counter</h1>
+            <p class="subtitle">Arduino UNO Q - Real-time Person Detection</p>
+        </header>
+
+        <main>
+            <section class="controls-section" aria-label="BusFlow stop display">
+                <h2>BusFlow · Next buses</h2>
+                <div id="forecast-display" aria-live="polite">No prediction available</div>
+            </section>
+            <!-- Video Feed: lo stream (con bounding box) è servito dal brick video_object_detection sulla porta 4912 -->
+            <section class="video-section">
+                <h2>📹 Live Feed</h2>
+                <div class="video-container">
+                    <div id="video-placeholder" class="video-placeholder">Ricerca fotocamera in corso...</div>
+                    <iframe id="camera-feed" title="Stream video della fotocamera" frameborder="0" class="hidden"></iframe>
+                    <div class="video-overlay" aria-live="polite">
+                        <div class="count-display">
+                            <div class="count-number" id="people-count">0</div>
+                            <div class="count-label">Persone presenti</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="controls-section">
+                <h2>⚙️ Controlli</h2>
+                <div class="control-group">
+                    <label for="confidence-slider">Soglia di confidenza:</label>
+                    <div class="slider-container">
+                        <input type="range" id="confidence-slider" min="0" max="100" value="40" step="5">
+                        <input type="number" id="confidence-input" min="0" max="100" value="40" step="5" aria-label="Soglia di confidenza in percentuale">
+                        <span class="unit">%</span>
+                    </div>
+                    <button id="reset-threshold" class="btn-secondary">Reset (40%)</button>
+                </div>
+            </section>
+
+            <section class="stats-section">
+                <h2>📊 Statistiche</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🕒</div>
+                        <div class="stat-value" id="last-update">--:--:--</div>
+                        <div class="stat-label">Ultimo aggiornamento</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💻</div>
+                        <div class="stat-value"><span id="cpu-usage">--</span>%</div>
+                        <div class="stat-label">CPU</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🧠</div>
+                        <div class="stat-value"><span id="ram-usage">--</span>%</div>
+                        <div class="stat-label">RAM</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-value" id="max-people">0</div>
+                        <div class="stat-label">Massimo rilevato</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🛰️</div>
+                        <div class="stat-value" id="server-status" aria-live="polite">--</div>
+                        <div class="stat-label" id="server-detail">Server centrale</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="history-section">
+                <h2>📋 Cronologia rilevamenti</h2>
+                <div id="detection-history" class="detection-list">
+                    <div class="empty-state">In attesa di rilevamenti...</div>
+                </div>
+            </section>
+        </main>
+
+        <div id="connection-status" class="connection-status disconnected">
+            <span class="status-indicator"></span>
+            <span id="status-text">Connessione...</span>
+        </div>
+
+        <div id="error-container" class="error-container hidden" role="alert">
+            <strong>⚠️ Connessione persa</strong>
+            <p>Tentativo di riconnessione in corso...</p>
+        </div>
+    </div>
+
+    <!-- Librerie ufficiali WebUI Brick (socket.io + classe WebUI) -->
+    <script src="libs/socket.io.min.js"></script>
+    <script src="libs/arduino.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

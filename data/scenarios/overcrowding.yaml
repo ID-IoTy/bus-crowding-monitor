@@ -1,0 +1,4 @@
+name: overcrowding
+force_peak: false
+target_multiplier: 10
+target_duration_s: 1200
