@@ -1,0 +1,236 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 2025" width="1200" height="2025" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Bus Crowding Monitor - Piano di business</title>
+  <desc id="d">Infografica: kit per fermata con ESP32-S3 e LoRa, connettività LoRaWAN con gateway 4G, rollout a quattro fasi, budget del pilota da 20 fermate, leve di ritorno dell'investimento e consigli.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a5a6a"/>
+    </marker>
+  </defs>
+  <style>
+    .h1{font-size:40px;font-weight:700;fill:#fff}
+    .sub{font-size:19px;fill:#e3e9f1}
+    .sub2{font-size:14px;fill:#9fb3c8}
+    .sec{font-size:24px;font-weight:700;fill:#0f2a44}
+    .secn{font-size:14px;fill:#6b7a89}
+    .ct{font-size:20px;font-weight:700;fill:#fff}
+    .cs{font-size:14px;fill:#fff}
+    .row{font-size:14px;fill:#22313f}
+    .price{font-size:14px;font-weight:700;fill:#22313f}
+    .colh{font-size:13px;font-weight:700;fill:#6b7a89}
+    .tot{font-size:22px;font-weight:700}
+    .note{font-size:13px;fill:#3d4b59}
+    .small{font-size:12px;fill:#6b7a89}
+    .wb{font-size:15px;font-weight:700;fill:#fff}
+    .ws{font-size:12px;fill:#e3e9f1}
+    .bb{font-size:15px;font-weight:700;fill:#0f2a44}
+    .bs{font-size:12px;fill:#4a5a6a}
+    .pt{font-size:17px;font-weight:700;fill:#0f2a44}
+    .pw{font-size:13px;font-weight:700;fill:#2a6fb5}
+    .tip{font-size:16px;font-weight:700;fill:#0f2a44}
+  </style>
+
+  <rect width="1200" height="2025" fill="#f4f6f9"/>
+
+  <!-- Header -->
+  <rect width="1200" height="160" fill="#0f2a44"/>
+  <text x="40" y="70" class="h1">Bus Crowding Monitor</text>
+  <text x="40" y="106" class="sub">Piano di business: kit per fermata, connettività e rollout a fasi</text>
+  <text x="40" y="136" class="sub2">GTT Torino · linee 33 e 42 · dalla misura passiva alla gestione predittiva</text>
+  <rect x="930" y="35" width="230" height="90" rx="12" fill="#f08a24"/>
+  <text x="1045" y="80" text-anchor="middle" font-size="30" font-weight="700" fill="#fff">≈ €1,2-1,6k</text>
+  <text x="1045" y="106" text-anchor="middle" font-size="14" fill="#fff">pilota · 20 fermate · hardware</text>
+  <rect x="0" y="160" width="300" height="8" fill="#2e9d5b"/>
+  <rect x="300" y="160" width="300" height="8" fill="#f2c230"/>
+  <rect x="600" y="160" width="300" height="8" fill="#f08a24"/>
+  <rect x="900" y="160" width="300" height="8" fill="#d64545"/>
+
+  <!-- 1. Kit per fermata -->
+  <text x="40" y="215" class="sec">1 · Kit per fermata</text>
+  <text x="270" y="215" class="secn">stima hardware, IVA esclusa</text>
+
+  <rect x="40" y="235" width="1120" height="320" rx="14" fill="#fff" stroke="#dde3ea"/>
+  <rect x="40" y="235" width="1120" height="70" rx="14" fill="#2e9d5b"/>
+  <rect x="40" y="285" width="1120" height="20" fill="#2e9d5b"/>
+  <text x="60" y="267" class="ct">XIAO ESP32-S3 SENSE + LORA</text>
+  <text x="60" y="291" class="cs">Autonomo: solare, nessun cavo, nessun allaccio elettrico</text>
+
+  <text x="60" y="340" class="row">XIAO ESP32-S3 Sense (camera inclusa)</text><text x="580" y="340" text-anchor="end" class="price">€13</text>
+  <text x="60" y="370" class="row">Modulo LoRa Wio-SX1262</text><text x="580" y="370" text-anchor="end" class="price">€5</text>
+  <text x="60" y="400" class="row">Sensore PIR (risveglio)</text><text x="580" y="400" text-anchor="end" class="price">€1</text>
+  <text x="60" y="430" class="row">Pannello 5 W + 2 celle 18650 + regolatore</text><text x="580" y="430" text-anchor="end" class="price">€12</text>
+  <text x="60" y="460" class="row">Box IP65 in ABS + fascetta da palo</text><text x="580" y="460" text-anchor="end" class="price">€6</text>
+  <line x1="60" y1="480" x2="580" y2="480" stroke="#dde3ea"/>
+  <text x="60" y="520" class="tot" fill="#22313f">Totale per fermata</text><text x="580" y="520" text-anchor="end" class="tot" fill="#2e9d5b">€37</text>
+
+  <line x1="615" y1="325" x2="615" y2="535" stroke="#dde3ea"/>
+  <text x="640" y="340" class="bb">Come lavora</text>
+  <text x="640" y="378" class="note">Conteggio TinyML on-device: l'immagine non lascia mai la scheda</text>
+  <text x="640" y="412" class="note">Il PIR sveglia la camera solo quando serve: consumo medio ~0,2 W</text>
+  <text x="640" y="446" class="note">Invio LoRa ogni 30-60 s con il conteggio aggiornato</text>
+  <text x="640" y="480" class="note">Montaggio a fascetta sul palo della fermata</text>
+
+  <!-- 2. Connettività -->
+  <text x="40" y="610" class="sec">2 · Connettività LoRaWAN</text>
+  <text x="345" y="610" class="secn">un gateway 4G serve tutte le fermate del pilota</text>
+  <rect x="40" y="630" width="1120" height="260" rx="14" fill="#fff" stroke="#dde3ea"/>
+
+  <rect x="70" y="650" width="170" height="46" rx="8" fill="#e8f0fa" stroke="#2a6fb5"/>
+  <text x="155" y="670" text-anchor="middle" class="bb">Fermata 1</text><text x="155" y="687" text-anchor="middle" class="bs">kit ESP32 + LoRa</text>
+  <rect x="70" y="712" width="170" height="46" rx="8" fill="#e8f0fa" stroke="#2a6fb5"/>
+  <text x="155" y="732" text-anchor="middle" class="bb">Fermata 2</text><text x="155" y="749" text-anchor="middle" class="bs">kit ESP32 + LoRa</text>
+  <rect x="70" y="774" width="170" height="46" rx="8" fill="#e8f0fa" stroke="#2a6fb5"/>
+  <text x="155" y="794" text-anchor="middle" class="bb">… Fermata 20</text><text x="155" y="811" text-anchor="middle" class="bs">kit ESP32 + LoRa</text>
+
+  <line x1="240" y1="673" x2="378" y2="725" stroke="#4a5a6a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+  <line x1="240" y1="735" x2="378" y2="735" stroke="#4a5a6a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+  <line x1="240" y1="797" x2="378" y2="745" stroke="#4a5a6a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+  <text x="310" y="663" text-anchor="middle" class="small">~10 byte / msg</text>
+
+  <rect x="380" y="690" width="210" height="90" rx="10" fill="#0f2a44"/>
+  <text x="485" y="722" text-anchor="middle" class="wb">Gateway LoRaWAN + 4G</text>
+  <text x="485" y="744" text-anchor="middle" class="ws">outdoor · ~€350 · 1 o 2</text>
+  <text x="485" y="764" text-anchor="middle" class="ws">raggio urbano 1-3 km</text>
+
+  <line x1="590" y1="735" x2="648" y2="735" stroke="#4a5a6a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="619" y="724" text-anchor="middle" class="small">4G</text>
+
+  <rect x="650" y="690" width="200" height="90" rx="10" fill="#fff" stroke="#0f2a44" stroke-width="2"/>
+  <text x="750" y="722" text-anchor="middle" class="bb">Network server</text>
+  <text x="750" y="744" text-anchor="middle" class="bs">ChirpStack self-hosted</text>
+  <text x="750" y="764" text-anchor="middle" class="bs">o The Things Network</text>
+
+  <line x1="850" y1="735" x2="908" y2="735" stroke="#4a5a6a" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="879" y="724" text-anchor="middle" class="small">webhook</text>
+
+  <rect x="910" y="690" width="230" height="90" rx="10" fill="#2a6fb5"/>
+  <text x="1025" y="722" text-anchor="middle" class="wb">Server :8000</text>
+  <text x="1025" y="744" text-anchor="middle" class="ws">/ingest/camera/observation</text>
+  <text x="1025" y="764" text-anchor="middle" class="ws">fusione + previsioni</text>
+
+  <text x="70" y="842" class="note">• Payload minimo (stop_id, count, trigger, ora): nessuna immagine lascia la fermata.</text>
+  <text x="70" y="864" class="note">• Un conteggio ogni 30-60 s per fermata, ~10 byte per messaggio: dentro il duty cycle EU868.</text>
+  <text x="70" y="886" class="note">• Il gateway con 4G non richiede fibra né rete del Comune: basta una presa e un punto alto.</text>
+
+  <!-- 3. Rollout -->
+  <text x="40" y="945" class="sec">3 · Rollout a fasi</text>
+  <text x="250" y="945" class="secn">prima dove il problema è concentrato, poi dove i dati lo giustificano</text>
+  <line x1="160" y1="990" x2="1030" y2="990" stroke="#9fb3c8" stroke-width="4"/>
+  <circle cx="160" cy="990" r="22" fill="#8fb3d9"/><text x="160" y="997" text-anchor="middle" class="wb">0</text>
+  <circle cx="450" cy="990" r="22" fill="#4f86c6"/><text x="450" y="997" text-anchor="middle" class="wb">1</text>
+  <circle cx="740" cy="990" r="22" fill="#2a5f9e"/><text x="740" y="997" text-anchor="middle" class="wb">2</text>
+  <circle cx="1030" cy="990" r="22" fill="#0f2a44"/><text x="1030" y="997" text-anchor="middle" class="wb">3</text>
+
+  <rect x="40" y="1025" width="250" height="195" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="60" y="1055" class="pt">Demo</text>
+  <text x="60" y="1076" class="pw">oggi · hackathon</text>
+  <text x="60" y="1105" class="note">1 fermata fisica (prototipo)</text>
+  <text x="60" y="1126" class="note">+ simulatore linee 33/42</text>
+  <text x="60" y="1155" class="note">Obiettivo: mostrare che le</text>
+  <text x="60" y="1176" class="note">previsioni reagiscono ai</text>
+  <text x="60" y="1197" class="note">conteggi reali</text>
+
+  <rect x="325" y="1025" width="250" height="195" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="345" y="1055" class="pt">Pilota</text>
+  <text x="345" y="1076" class="pw">3-6 mesi</text>
+  <text x="345" y="1105" class="note">20 fermate su 33/42</text>
+  <text x="345" y="1126" class="note">1-2 gateway LoRaWAN + 4G</text>
+  <text x="345" y="1155" class="note">KPI: confidenza calibrata</text>
+  <text x="345" y="1176" class="note">entro ±10 punti su dati</text>
+  <text x="345" y="1197" class="note">reali, non solo simulati</text>
+
+  <rect x="615" y="1025" width="250" height="195" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="635" y="1055" class="pt">Linee critiche</text>
+  <text x="635" y="1076" class="pw">6-18 mesi</text>
+  <text x="635" y="1105" class="note">100-200 fermate scelte</text>
+  <text x="635" y="1126" class="note">con i dati APC di GTT</text>
+  <text x="635" y="1155" class="note">KPI: domanda persa</text>
+  <text x="635" y="1176" class="note">misurata, corse e mezzi</text>
+  <text x="635" y="1197" class="note">riallocati</text>
+
+  <rect x="905" y="1025" width="255" height="195" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="925" y="1055" class="pt">Rete + GTFS-RT</text>
+  <text x="925" y="1076" class="pw">oltre 18 mesi</text>
+  <text x="925" y="1105" class="note">Estensione per ondate</text>
+  <text x="925" y="1126" class="note">e passaggio al cablato</text>
+  <text x="925" y="1155" class="note">Affollamento su Google</text>
+  <text x="925" y="1176" class="note">Maps, Apple Maps, Moovit,</text>
+  <text x="925" y="1197" class="note">senza app dedicata</text>
+
+  <rect x="40" y="1240" width="1120" height="58" rx="10" fill="#e8f0fa"/>
+  <text x="60" y="1264" class="row"><tspan font-weight="700">Come scegliere le fermate:</tspan> ordinarle per saliti APC × frequenza di bus partiti pieni (departed_full).</text>
+  <text x="60" y="1285" class="row">Poche fermate concentrano gran parte del problema: lì il costo per passeggero servito è più basso.</text>
+
+  <!-- 4. Budget -->
+  <text x="40" y="1350" class="sec">4 · Budget pilota</text>
+  <text x="245" y="1350" class="secn">20 fermate, solo hardware</text>
+  <rect x="40" y="1365" width="550" height="255" rx="14" fill="#fff" stroke="#dde3ea"/>
+  <text x="440" y="1392" text-anchor="end" class="colh">1 gateway</text>
+  <text x="570" y="1392" text-anchor="end" class="colh">2 gateway</text>
+  <text x="60" y="1420" class="row">20 × kit fermata (€37)</text><text x="440" y="1420" text-anchor="end" class="price">€740</text><text x="570" y="1420" text-anchor="end" class="price">€740</text>
+  <text x="60" y="1448" class="row">Gateway LoRaWAN + 4G outdoor (~€350)</text><text x="440" y="1448" text-anchor="end" class="price">€350</text><text x="570" y="1448" text-anchor="end" class="price">€700</text>
+  <text x="60" y="1476" class="row">SIM IoT 4G, 12 mesi (~€5/mese)</text><text x="440" y="1476" text-anchor="end" class="price">€60</text><text x="570" y="1476" text-anchor="end" class="price">€120</text>
+  <text x="60" y="1504" class="row">Network server ChirpStack (open source)</text><text x="440" y="1504" text-anchor="end" class="price">€0</text><text x="570" y="1504" text-anchor="end" class="price">€0</text>
+  <line x1="60" y1="1522" x2="570" y2="1522" stroke="#dde3ea"/>
+  <text x="60" y="1555" class="tot" fill="#22313f">Totale</text><text x="440" y="1555" text-anchor="end" class="tot" fill="#2e9d5b">≈ €1.150</text><text x="570" y="1555" text-anchor="end" class="tot" fill="#f08a24">≈ €1.560</text>
+  <text x="60" y="1585" class="small">1 gateway: fermate entro ~2 km da un punto alto. 2: intero tratto + ridondanza.</text>
+  <text x="60" y="1603" class="small">Esclusi installazione e permessi.</text>
+
+  <!-- 5. ROI -->
+  <text x="610" y="1350" class="sec">5 · Ritorno dell'investimento</text>
+  <rect x="610" y="1365" width="550" height="255" rx="14" fill="#fff" stroke="#dde3ea"/>
+  <circle cx="645" cy="1399" r="14" fill="#d64545"/><text x="645" y="1404" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">1</text>
+  <text x="672" y="1397" class="bb">Domanda persa</text>
+  <text x="672" y="1417" class="note">lasciati a terra × tariffa = ricavo perso, invisibile all'APC</text>
+  <circle cx="645" cy="1454" r="14" fill="#f08a24"/><text x="645" y="1459" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">2</text>
+  <text x="672" y="1452" class="bb">Flotta e percorsi</text>
+  <text x="672" y="1472" class="note">mezzi spostati dalle corse vuote alle fermate croniche</text>
+  <circle cx="645" cy="1509" r="14" fill="#f2c230"/><text x="645" y="1514" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">3</text>
+  <text x="672" y="1507" class="bb">Evasione tariffaria</text>
+  <text x="672" y="1527" class="note">APC vs validazioni per linea e ora → controlli mirati</text>
+  <line x1="630" y1="1545" x2="1140" y2="1545" stroke="#dde3ea"/>
+  <text x="630" y="1573" class="bb">Modello: hardware-as-a-service + canone SaaS per fermata/mese</text>
+  <text x="630" y="1600" class="small">Payback = costo rete / (ricavi recuperati + km risparmiati + controlli più efficaci)</text>
+
+  <!-- 6. Consigli -->
+  <text x="40" y="1670" class="sec">6 · Altri consigli</text>
+
+  <rect x="40" y="1690" width="360" height="120" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="60" y="1720" class="tip">Riusa le paline esistenti</text>
+  <text x="60" y="1745" class="note">Dove GTT ha già paline elettroniche, camera</text>
+  <text x="60" y="1765" class="note">e display sfruttano alimentazione e supporti</text>
+  <text x="60" y="1785" class="note">esistenti: meno costi e meno permessi.</text>
+
+  <rect x="420" y="1690" width="360" height="120" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="440" y="1720" class="tip">Opzione senza camera</text>
+  <text x="440" y="1745" class="note">Radar mmWave o termico a bassa risoluzione</text>
+  <text x="440" y="1765" class="note">contano persone senza immagini (€20-60):</text>
+  <text x="440" y="1785" class="note">privacy più semplice da dimostrare.</text>
+
+  <rect x="800" y="1690" width="360" height="120" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="820" y="1720" class="tip">GDPR prima del pilota</text>
+  <text x="820" y="1745" class="note">Anche senza salvare frame servono DPIA,</text>
+  <text x="820" y="1765" class="note">cartelli informativi e un accordo chiaro</text>
+  <text x="820" y="1785" class="note">con GTT e Comune sui ruoli privacy.</text>
+
+  <rect x="40" y="1825" width="360" height="120" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="60" y="1855" class="tip">Partner locali</text>
+  <text x="60" y="1880" class="note">Torino City Lab per testare su strada,</text>
+  <text x="60" y="1900" class="note">5T per i dati di mobilità, GTT per APC</text>
+  <text x="60" y="1920" class="note">e AVL: i dati di partenza esistono già.</text>
+
+  <rect x="420" y="1825" width="360" height="120" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="440" y="1855" class="tip">Fondi pubblici</text>
+  <text x="440" y="1880" class="note">Bandi smart city e TPL (PN Metro Plus,</text>
+  <text x="440" y="1900" class="note">programmi UE) finanziano spesso i piloti:</text>
+  <text x="440" y="1920" class="note">presentarsi con risultati già misurati.</text>
+
+  <rect x="800" y="1825" width="360" height="120" rx="12" fill="#fff" stroke="#dde3ea"/>
+  <text x="820" y="1855" class="tip">Manutenzione come dato</text>
+  <text x="820" y="1880" class="note">OTA, watchdog, box antivandalo. L'alert</text>
+  <text x="820" y="1900" class="note">SENSOR_STALE diventa direttamente il</text>
+  <text x="820" y="1920" class="note">ticket di intervento per i tecnici.</text>
+
+  <!-- Footer -->
+  <text x="40" y="1978" class="small">Prezzi indicativi, ottobre 2026, IVA esclusa, piccoli lotti. Riferimenti: kit XIAO ESP32-S3 + Wio-SX1262 da $10,90 (Seeed); gateway outdoor 4G tipo Dragino DLOS8N.</text>
+  <text x="40" y="1996" class="small">Installazione e permessi esclusi. I dati del prototipo sono simulati.</text>
+</svg>
