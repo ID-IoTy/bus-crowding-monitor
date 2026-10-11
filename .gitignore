@@ -7,3 +7,11 @@ __pycache__/
 .venv/
 *.local
 gtt_gtfs.zip
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+data/history/
+backend/artifacts/
+.pytest_cache/
+.ruff_cache/

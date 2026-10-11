@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 from app.config import MODEL, SIM
 from app.contracts import CameraObservation, CountRequest, VehicleApproach, VehicleDeparture, DisplayBus, DisplayPayload
+from app.core.utils import pct, crowd_label
 
 ROME = ZoneInfo("Europe/Rome")
 
@@ -18,7 +19,7 @@ def timestamp(value):
 
 
 def level(percent):
-    return next((name for bound, name in zip(MODEL["color_thresholds"], ["green", "yellow", "orange"]) if percent <= bound * 100), "red")
+    return crowd_label(percent / 100)
 
 
 class Core:
@@ -42,7 +43,9 @@ class Core:
             self.geometry[route["id"]] = (points, anchors)
 
     def _save(self, event, kind, key):
-        if not self.store.append(key, kind, self.dataset, event.model_dump(mode="json")):
+        payload = event.model_dump(mode="json")
+        payload["received_at"] = self.now().isoformat()
+        if not self.store.append(key, kind, self.dataset, payload):
             return False
         self.dirty = True
         return True
@@ -187,15 +190,13 @@ class Core:
             people = people - off + on
             risk = float(np.mean(on < demand))
             leaving = float(np.mean(people))
-            percent = round(leaving / SIM["capacity"] * 100)
+            percent = pct(leaving / SIM["capacity"])
             passage = {"stopId": stop["id"], "arrival": arrival.isoformat(), "departure": (arrival + timedelta(seconds=SIM["dwell_base_s"] + SIM["boarding_s"] * float(np.mean(on)) + SIM["alighting_s"] * float(np.mean(off)))).isoformat(), "arriving": round(arriving), "leaving": round(leaving), "percent": percent, "alighting": round(float(np.mean(off))), "boarding": round(float(np.mean(on))), "leftBehind": round(float(np.mean(demand - on))), "may_not_fit": risk > MODEL["risk_open"], "p_red": risk, "level": level(percent), "interval_80": np.quantile(people, [.1, .9]).tolist(), "confidence": None, "reliability": None, "generated_at": now.isoformat(), "kind": "predicted", "basis": "live-history" if live else "history-only", "model_version": "p0-averages"}
             passages.append(passage)
         at = view_at
         position_kind = "predicted" if at > now + timedelta(seconds=1) else "not-started" if at < start else "simulated-current"
         elapsed = (at - start).total_seconds() - delay
         idx = max(0, min(len(route["stops"]) - 1, next((i - 1 for i, offset in enumerate(route["offsets"]) if offset > elapsed), len(route["stops"]) - 1)))
-        a = route["stops"][idx]
-        b = route["stops"][min(idx + 1, len(route["stops"]) - 1)]
         fraction = min(1, max(0, (elapsed - route["offsets"][idx]) / max(1, route["offsets"][min(idx + 1, len(route["stops"]) - 1)] - route["offsets"][idx])))
         points, anchors = self.geometry[route["id"]]
         progress = anchors[idx] + (anchors[min(idx + 1, len(anchors) - 1)] - anchors[idx]) * fraction
