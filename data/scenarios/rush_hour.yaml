@@ -1,0 +1,4 @@
+name: rush_hour
+force_peak: true
+target_multiplier: 1
+target_duration_s: 0

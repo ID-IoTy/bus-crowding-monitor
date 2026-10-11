@@ -1,5 +1,9 @@
 # Bus Crowding Monitor - Technical Specification
 
+## test-v2 P0 implementation overrides (2026-10-11)
+
+These decisions supersede contradictory examples below: only lines 33/42; total capacity 70 assumed, seated capacity unknown (`null`). Bus colour thresholds are green <=60%, yellow <=75%, orange <=90%, red >90%. Boarding risk is separate from colour. Validated reliability is null until P1. The preserved address-only responsive passenger UI is part of this P0 delivery. `/api/journey` also accepts `requested_at` and returns up to three scheduled runs per route pattern with full arrival/departure passages. Scenarios, history training, camera gateway and simulator/core isolation follow this specification. Legacy colleague implementation at backend commit `0c87766a13e9b5c7edb2d19e66da74b2fda2113c` is preserved under `server/` for reference, not started alongside `backend/`.
+
 This is the single source of truth for how the system works: scope, architecture, clock, simulator, message contracts, data model, prediction logic, alerts and environment.
 
 - Human overview and pitch: [`README.md`](../README.md)
@@ -1049,3 +1053,4 @@ Exact versions are pinned in `pyproject.toml` + `uv.lock` and `package.json` + `
 - Alignment with the existing frontend code on the `frontend` branch: pending, the team will specify which code to follow (task O1).
 - Tune the simulation parameters and alert thresholds after the first runs, so that `rush_hour` produces at least one CAPACITY_RISK on the shared section within 10 simulated minutes.
 - Authentication and TLS before any non-localhost exposure.
+

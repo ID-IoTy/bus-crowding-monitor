@@ -1,0 +1,21 @@
+n_samples: 500
+recompute_s: 15
+stale_s: 180
+aging_variance: 0.1
+camera_error: 0.08
+camera_base_variance: 1
+capacity: 70
+seated_capacity: null
+color_thresholds: [0.60, 0.75, 0.90]
+post_departure_s: 10
+departed_full_ratio: 0.95
+share_prior_variance: 0.05
+share_max_samples: 200
+passerby_min_samples: 10
+left_behind_threshold: 5
+risk_open: 0.5
+risk_close: 0.3
+crowd_z_open: 3
+crowd_z_close: 2
+crowd_variance_floor: 4
+edge_timeout_s: 2
