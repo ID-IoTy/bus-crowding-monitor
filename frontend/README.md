@@ -1,4 +1,4 @@
-# Frontend v2
+# Frontend: passenger journey iteration
 
 React/TypeScript, Vite and Leaflet. All runtime activity is explicitly synthetic. No production backend logic is changed by this branch.
 
@@ -12,9 +12,15 @@ npm test
 npm run build
 ```
 
-Use Node 22.18+ or 24. Vite prints the actual localhost port. `/#citizens` and `/#operators` share simulation state in one tab; separate tabs are independent. History is hidden from the citizen interface but not protected by authentication.
+Use Node 22.18+ or 24. Vite prints the actual localhost port. `/#citizens` and `/#operators` share the scenario and clock controls, but currently use different synthetic service models. Separate tabs are independent. History is hidden from the citizen interface but not protected by authentication.
 
-## Implementation
+## New passenger planner
+
+`PassengerJourney.tsx` implements stop search, optional direct destination, future date/time, route cards and shared bus selection. `JourneyMap.tsx` implements isolated route gradients and zoom-dependent stop visibility. `journey.ts` contains pure routing, timetable, passenger exchange, demand-profile, timezone and geometry functions. Tests cover each direction, date changes, capacity bounds, missing capacity, conservation and shape progression.
+
+See [the model specification](../docs/PASSENGER_JOURNEY.md) for the synthetic timetable and prediction contract. The historical profiles here are hand-authored; the legacy worker's calibration is not reused. The operator view below remains unchanged. Backend integration is deferred.
+
+## Preserved operator implementation (v2)
 
 - `simulation.ts`: seeded private queue/destination and vehicle state; capacity-constrained boarding, alighting, one shared queue per stop; 60-second periodic observations, pre-arrival and post-departure observations. Simulation time advances in ten-second internal steps.
 - `predictions.ts`: consumes only public observations and learned aggregates, never private passenger destinations. Stop predictions anchor historical levels to current counts and estimate approaching bus effects. Bus predictions use learned net occupancy changes and observed demand.

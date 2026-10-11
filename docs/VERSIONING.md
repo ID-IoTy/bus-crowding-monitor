@@ -10,7 +10,7 @@ The planned `v0.1.0-demo` tag and "Initial frontend demo" release are pending, n
 
 ## Workflow
 
-Current status: frontend v2 is the active standalone deliverable. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
+Current status: `frontend-v3-journey` is the active standalone deliverable; v2 iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
 
 1. Commit v2 work on `frontend-v2`, preserving the baseline branch.
 2. Open component PRs targeting `integration`, in order: frontend-v2, backend, Arduino.
@@ -27,14 +27,15 @@ No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-
 
 ## Capacity iteration and recovery index
 
-The active iteration is `frontend-v2-capacity-70`, based on clean-map commit `c478f111c6ebfa97e8433676e4563ed022e7a0d4`. Earlier branches remain unchanged.
+The active iteration is `frontend-v3-journey`, created from capacity commit `536b3d0022264125434b4603406282776bee7395`. Earlier branches remain unchanged.
 
 | Iteration | Preserved branch | Exact starting or completed commit |
 | --- | --- | --- |
 | Initial three-bus demo | `frontend` | `596f559085c134f471c79c26be38c877b0738751` |
 | Completed frontend v2 | `frontend-v2` | `b08777bb03a81dfe018ef76447e188fb846bc7ee` |
 | Compact map, 75 total / 32 seated | `frontend-v2-clean-map` | `c478f111c6ebfa97e8433676e4563ed022e7a0d4` |
-| Compact map, 70 total / 25 seated | `frontend-v2-capacity-70` | Branch history contains the capacity change as a separate commit |
+| Compact map, 70 total / 25 seated | `frontend-v2-capacity-70` | `536b3d0022264125434b4603406282776bee7395` |
+| Stop-first passenger planner | `frontend-v3-journey` | Starts at `536b3d0022264125434b4603406282776bee7395`; subsequent commits contain the planner |
 
 For each future iteration, keep the last delivered branch frozen and create a new working branch from its verified head. Record the source SHA and the change here. Recover a previous iteration in a separate clone using `git switch --detach <exact-commit-sha>`, or create a new branch from that SHA. Use that iteration's lockfile and README; do not reset or force-push a shared branch. Integration remains deferred.
 

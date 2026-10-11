@@ -7,7 +7,8 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 | Branch | Purpose |
 | --- | --- |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
-| `frontend-v2-capacity-70` | Current clean-map iteration: 70 total passenger places, including 25 seats per bus |
+| `frontend-v3-journey` | Current stop-first passenger planner: optional destination/date, three scheduled services and after-departure forecasts |
+| `frontend-v2-capacity-70` | Preserved clean-map iteration at `536b3d0022264125434b4603406282776bee7395` |
 | `frontend-v2-clean-map` | Visual variant with compact colour markers and click-to-open details |
 | `frontend-v2` | Four-line, five-bus frontend with live/forecast maps and measured synthetic evaluation |
 | `backend` | Colleague's FastAPI server in `server/` |
@@ -17,7 +18,21 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 The initial demo remains recoverable from its branch and exact commit. The planned `v0.1.0-demo` tag/release has not yet been created: the connected GitHub tool does not expose release/tag creation, and the available browser is signed out. Do not move the preserved branch or rewrite its history. See [versioning](docs/VERSIONING.md).
 
-## Clean-map variation
+## Passenger journey iteration
+
+Choose a departure stop by name, code or zooming into the map. Destination is optional: when provided, only direct services reaching it after departure in the same direction appear. Date/time is optional and interpreted in Europe/Rome; **Now** uses the simulated clock. Future dates are supported. No transfers are planned.
+
+Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for observed counts, arrival/departure estimates and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
+
+Selecting a direction isolates and fits its full route. A continuous colour interpolation follows the actual route shape using mean after-departure forecasts from the displayed trips; selecting a trip switches to its own forecasts. Past/unavailable forecasts are grey. Optional origin-to-destination travel is emphasized and the rest attenuated. Stop dots appear at zoom 15; selected endpoints remain visible. Stop details offer **Start here** and **Set destination**. Labels for nearby buses are offset so all remain selectable; future/not-started positions are explicitly labelled.
+
+The passenger planner uses a new deterministic **synthetic scheduled service**, not the transport operator's timetable: every 10 minutes, 24 hours/day, all eight imported directions, three minutes travel and 30 seconds dwell per stop. It combines hand-authored historical demand profiles with recent synthetic stop observations; it is not trained ML. See [passenger model and handoff](docs/PASSENGER_JOURNEY.md) for exact assumptions and interfaces.
+
+The control room retains the v2 five-bus simulation and its existing evaluation. The two demos share scenario and clock controls, **not a common fleet or count dataset**. Its calibration scores do not validate the new passenger predictions. Unifying both views with the colleague's backend is deferred; no backend/Arduino code has been merged.
+
+The v2 sections below describe that preserved control-room model and earlier passenger screen, not the new planner.
+
+## Clean-map variation (v2)
 
 The `frontend-v2-clean-map` branch preserves the original v2 and adds a quieter map. Bus markers show only the line number; stop markers are 10px dots with 24px interactive targets. Click, tap or keyboard activation opens counts, timestamps and forecast details. Stop details are not pre-opened on initial load. The original bus brand icon is restored and decorative 33/42 sidebar badges are removed.
 
@@ -40,7 +55,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v2-capacity-70 for this iteration, then:
+# Check out frontend-v3-journey for this iteration, then:
 cd frontend
 npm ci
 npm run dev
@@ -70,7 +85,7 @@ Reliability means the measured frequency of a correct crowd category in a compar
 
 ## Backend and Arduino integration
 
-Integration is deferred for now. The `integration` branch has been created, but no component branches have been merged into it. Frontend v2 is delivered independently on `frontend-v2`.
+Integration is deferred for now. The `integration` branch has been created, but no component branches have been merged into it. The current standalone passenger iteration is delivered on `frontend-v3-journey`; earlier frontend branches remain recoverable.
 
 The backend already exists in the colleague's `backend` branch. Arduino already has an HTTP reporter using `POST /ingest/stop-event` and `POST /ingest/bus-event` with `X-API-Key`.
 
