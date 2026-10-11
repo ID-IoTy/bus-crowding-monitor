@@ -19,3 +19,5 @@ crowd_z_open: 3
 crowd_z_close: 2
 crowd_variance_floor: 4
 edge_timeout_s: 2
+history_max_days: 31
+history_ranking_limit: 10

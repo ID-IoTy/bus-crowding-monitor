@@ -19,7 +19,7 @@ All service movements, timetables and historical training observations are synth
 
 The demo assumes **70 total places per bus**. Actual capacity is not verified and seated capacity is unknown. No seat availability is promised. Bus levels use green <=60%, yellow >60–75%, orange >75–90%, red >90%; boarding risk is a separate warning.
 
-P0 forecasts combine synthetic historical averages with recent counts and Monte Carlo propagation through estimated alighting and capacity-limited boarding. Line allocation and passer-by behaviour remain model assumptions. Validated reliability/accuracy is unavailable; Monte Carlo probabilities are not calibrated accuracy. Missing or stale readings older than 180 simulated seconds are unavailable, never zero. Advanced historical insights and calibration remain P1.
+P0 forecasts combine synthetic historical averages with recent counts and Monte Carlo propagation through estimated alighting and capacity-limited boarding. Line allocation and passer-by behaviour remain model assumptions. Validated reliability/accuracy is unavailable; Monte Carlo probabilities are not calibrated accuracy. Missing or stale readings older than 180 simulated seconds are unavailable, never zero. Validated reliability and advanced causal analytics remain P1.
 
 ## Start locally on Windows
 
@@ -82,3 +82,10 @@ npm run build
 Regenerate OpenAPI and TypeScript contracts with `./scripts/gen-types.ps1` from the repository root. [API contract](docs/API_CONTRACT.md) documents the integrated interface.
 
 The merge checks include 10 backend tests (including mock count → observation → changed prediction → display), 19 frontend/domain tests and the production build. Frontend tests include preserved standalone-model tests; they do not establish full live-browser end-to-end coverage. Backend/frontend HTTP responses and the corrected passenger map were checked locally. Full desktop/mobile integrated interaction acceptance and real Arduino verification remain separate checks; mock tests do not validate the physical counting model.
+
+## Operator historical charts
+
+The control room now has **History & insights**: hourly/day charts for mean waiting and bus occupancy, high-load reading share and busiest-stop ranking. Filter by dates, line/direction and stop. All figures come from archived backend observations, labelled synthetic; no frontend-generated history is substituted. Means are weighted by observation counts, not passenger- or time-weighted network totals. Missing values stay unavailable. The archive is cached after the first load, which may take several seconds; later filter changes use grouped data. Restart the backend after rebuilding the archive offline.
+
+The operator layout uses the same rounded green workspace, typography and touch-sized controls as the passenger view, with map, action center and history navigation. These features do not add calibrated reliability or real-world historical validation. The API is still unauthenticated/local: operator-only presentation is not a security boundary.
+

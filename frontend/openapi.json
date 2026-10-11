@@ -253,6 +253,102 @@
         }
       }
     },
+    "/api/operator/history": {
+      "get": {
+        "summary": "Operator History",
+        "operationId": "operator_history_api_operator_history_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End"
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Route Id"
+            }
+          },
+          {
+            "name": "stop_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stop Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/operator/alerts": {
       "get": {
         "summary": "Alerts",
@@ -765,6 +861,282 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HistoryBucket": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "waiting_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waiting Mean"
+          },
+          "onboard_percent_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboard Percent Mean"
+          },
+          "waiting_samples": {
+            "type": "integer",
+            "title": "Waiting Samples"
+          },
+          "vehicle_samples": {
+            "type": "integer",
+            "title": "Vehicle Samples"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "waiting_mean",
+          "onboard_percent_mean",
+          "waiting_samples",
+          "vehicle_samples"
+        ],
+        "title": "HistoryBucket"
+      },
+      "HistoryStop": {
+        "properties": {
+          "stop_id": {
+            "type": "string",
+            "title": "Stop Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "mean_waiting": {
+            "type": "number",
+            "title": "Mean Waiting"
+          },
+          "peak_waiting": {
+            "type": "integer",
+            "title": "Peak Waiting"
+          },
+          "samples": {
+            "type": "integer",
+            "title": "Samples"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stop_id",
+          "name",
+          "mean_waiting",
+          "peak_waiting",
+          "samples"
+        ],
+        "title": "HistoryStop"
+      },
+      "HistorySummary": {
+        "properties": {
+          "waiting_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waiting Mean"
+          },
+          "onboard_percent_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Onboard Percent Mean"
+          },
+          "high_load_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High Load Percent"
+          },
+          "waiting_samples": {
+            "type": "integer",
+            "title": "Waiting Samples"
+          },
+          "vehicle_samples": {
+            "type": "integer",
+            "title": "Vehicle Samples"
+          },
+          "observed_stops": {
+            "type": "integer",
+            "title": "Observed Stops"
+          }
+        },
+        "type": "object",
+        "required": [
+          "waiting_mean",
+          "onboard_percent_mean",
+          "high_load_percent",
+          "waiting_samples",
+          "vehicle_samples",
+          "observed_stops"
+        ],
+        "title": "HistorySummary"
+      },
+      "HistoryView": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "source": {
+            "type": "string",
+            "const": "synthetic_history",
+            "title": "Source",
+            "default": "synthetic_history"
+          },
+          "available_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available From"
+          },
+          "available_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available To"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          },
+          "route_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route Id"
+          },
+          "stop_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop Id"
+          },
+          "capacity_assumed": {
+            "type": "integer",
+            "title": "Capacity Assumed"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/HistorySummary"
+          },
+          "hourly": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryBucket"
+            },
+            "type": "array",
+            "title": "Hourly"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryBucket"
+            },
+            "type": "array",
+            "title": "Daily"
+          },
+          "busiest_stops": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryStop"
+            },
+            "type": "array",
+            "title": "Busiest Stops"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "available_from",
+          "available_to",
+          "start",
+          "end",
+          "route_id",
+          "stop_id",
+          "capacity_assumed",
+          "summary",
+          "hourly",
+          "daily",
+          "busiest_stops",
+          "notes"
+        ],
+        "title": "HistoryView"
       },
       "JourneyOption": {
         "properties": {

@@ -67,3 +67,7 @@ The active `frontend-v3-address-only` iteration starts from `a36b4376d0c0f74cebb
 The user requested promotion of the latest integrated version to `main`. Publish the remaining local BusFlow frontend, map CSS fix, backend refinements and launch documentation on `test-v2` first, then merge through a pull request using a merge commit. Keep `test-v2`, `test` and all earlier component/iteration branches; do not force-push or delete them. A merge does not establish real-hardware acceptance or completion of all P0/P1 checks. See the README for verified coverage and remaining limitations.
 
 To recover the prior main, create a separate checkout or branch at its exact SHA above. The pull request records the final promoted head, so every version remains recoverable through Git history.
+
+## Operator history and UI iteration
+
+`feature/operator-history` starts from integrated main commit `f16310eecab2e69422e482e9669b8b6cb9d3a4e4`. It adds backend historical observation aggregates and an operator dashboard using the rounded dark-green BusFlow workspace. The previous integrated main and `test-v2` remain recoverable; advanced calibration, abandonment attribution and historical sensor-uptime reporting are not included.

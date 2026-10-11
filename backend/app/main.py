@@ -9,6 +9,9 @@ from app.cli import load_network
 from app.config import ROOT, SIM, MODEL, SCENARIOS
 from app.contracts import VehicleApproach, VehicleDeparture, CameraObservation, ClockCommand, ScenarioCommand, CameraModeCommand, WsEnvelope
 from app.contracts.views import JourneyView, StopView
+from app.contracts.history import HistoryView
+from app.core.history import history_view
+from datetime import date
 from app.core.db import Store
 from app.core.engine import Core, timestamp
 from app.sim.world import World, schedule
@@ -124,6 +127,18 @@ def journey(origin: str = Query(alias="from"), destination: str = Query(default=
             raise ValueError("Choose a future time or Now")
         return core.journey(origin, destination, requested)
     except KeyError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@app.get("/api/operator/history", response_model=HistoryView)
+def operator_history(start: date | None = None, end: date | None = None,
+                     route_id: str | None = None, stop_id: str | None = None):
+    try:
+        return history_view(runtime()[1], SIM["capacity"], MODEL["color_thresholds"][-1] * 100,
+                            start, end, route_id, stop_id)
+    except LookupError as exc:
         raise HTTPException(404, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc

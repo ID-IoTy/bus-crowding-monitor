@@ -1,5 +1,7 @@
 import type { JourneyOption } from '../journey';
 import type { Network } from '../types';
+import type { components } from './generated';
+export type HistoryView = components['schemas']['HistoryView'];
 const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
 export type Reading = { value: number | null; measured_at: string | null; source: 'simulated' | 'physical' | null; status: 'ok' | 'stale' | 'missing' };
 export type ApiStop = { stop_id: string; name: string; lat: number; lon: number; waiting: Reading; camera: { mode: string }; next_buses: JourneyOption[] };
@@ -12,6 +14,7 @@ export async function request<T>(path: string, body?: unknown, signal?: AbortSig
  return response.json() as Promise<T>;
 }
 export const api = {
+ history: (filters: {start?: string; end?: string; route_id?: string; stop_id?: string}, signal?: AbortSignal) => request<HistoryView>('/api/operator/history?' + new URLSearchParams(Object.entries(filters).filter(([,v])=>Boolean(v)) as [string,string][]), undefined, signal),
  network: () => request<Network>('/api/lines'), state: () => request<SimState>('/sim/state'),
  stops: () => request<ApiStop[]>('/api/stops'), stop: (id: string, signal?: AbortSignal) => request<ApiStop>('/api/stops/' + encodeURIComponent(id), undefined, signal),
  vehicles: () => request<ApiVehicle[]>('/api/vehicles'), alerts: () => request<ApiAlert[]>('/api/operator/alerts'),

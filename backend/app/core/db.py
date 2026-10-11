@@ -12,6 +12,7 @@ class Store:
             db.execute(text("CREATE TABLE IF NOT EXISTS model_stats (id TEXT PRIMARY KEY, payload TEXT)"))
             db.execute(text("CREATE TABLE IF NOT EXISTS alerts (id TEXT PRIMARY KEY, payload TEXT)"))
             db.execute(text("CREATE TABLE IF NOT EXISTS predictions (id TEXT PRIMARY KEY, payload TEXT)"))
+            db.execute(text("CREATE INDEX IF NOT EXISTS messages_dataset_type ON messages(dataset,type)"))
 
     def clear_live(self):
         with self.engine.begin() as db:
