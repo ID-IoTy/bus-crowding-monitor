@@ -191,3 +191,16 @@
  .app-passenger .place-search .stop-search-results{min-width:280px}
  .app-passenger .place-search:nth-of-type(3) .stop-search-results{left:auto}
 }
+
+.suggested-stop-pairs{grid-column:1/-1;min-width:0}
+.suggested-stop-pairs label{display:block}
+.suggested-stop-pairs select{display:block;margin-top:4px;min-height:30px;padding:6px 24px 6px 8px;font-size:10px}
+.suggested-stop-pairs p,.place-plan-message{font-size:11px;line-height:1.4;color:#526c5c}
+@media(min-width:761px) and (max-height:700px){
+ .app-passenger .suggested-stop-pairs{grid-column:1}
+ .app-passenger .journey-search-grid:has(.suggested-stop-pairs) .journey-datetime{grid-column:2}
+ .app-passenger .journey-search-grid:has(.suggested-stop-pairs) .journey-datetime>small{display:none}
+ .app-passenger .suggested-stop-pairs label{font-size:9px}
+ .app-passenger .suggested-stop-pairs select{height:28px;min-height:28px;font-size:9px;margin-top:3px}
+ .app-passenger .suggested-stop-pairs p{font-size:10px}
+}
