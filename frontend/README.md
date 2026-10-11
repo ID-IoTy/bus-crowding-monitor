@@ -47,3 +47,8 @@ See the root README and `docs/API_CONTRACT.md` for integration status.
 ## Clean-map presentation variant
 
 Branch `frontend-v2-clean-map` keeps the v2 simulation and model unchanged. Map markers hide counts until activated: buses display route numbers and stops use small coloured dots. Popups support click, tap, Enter and Space; Escape closes them. Bus detail prioritizes total-capacity occupancy percentage, with raw counts as secondary detail. Green/yellow/orange/red use 40/60/85% boundaries; grey means older or missing readings. Stop colours use illustrative capacities. Calibrated three-category reliability is unchanged. The original bus brand icon is restored and the sidebar route badges are removed.
+
+## Uniform fleet capacity iteration
+
+Branch `frontend-v2-capacity-70` builds on the preserved clean-map variant. Each of the five buses has 70 total passenger places, including 25 seats; the driver is excluded. The simulator enforces the same capacity during initialization and boarding, while forecasts, historical pressure estimates and occupancy percentages use the reported bus capacity. Synthetic history and reliability are rebuilt using this configuration. Free seats remain unknown. Stop demand is unchanged in this iteration; the discussed smaller queues are not yet implemented.
+

@@ -7,6 +7,7 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 | Branch | Purpose |
 | --- | --- |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
+| `frontend-v2-capacity-70` | Current clean-map iteration: 70 total passenger places, including 25 seats per bus |
 | `frontend-v2-clean-map` | Visual variant with compact colour markers and click-to-open details |
 | `frontend-v2` | Four-line, five-bus frontend with live/forecast maps and measured synthetic evaluation |
 | `backend` | Colleague's FastAPI server in `server/` |
@@ -39,7 +40,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v2-clean-map for this variation, then:
+# Check out frontend-v2-capacity-70 for this iteration, then:
 cd frontend
 npm ci
 npm run dev
@@ -61,7 +62,7 @@ The device workstream counts people present, not confirmed boardings or alightin
 
 Counts alone cannot establish exact boarding/alighting, individual destinations, or abandonment. A drop in a queue is not evidence that people left because of delay. Total onboard counts do not reveal free seats.
 
-Demo vehicle capacity is 75 including 32 seats. Stop capacities are illustrative: 30, or 60 for shared 33/42 stops. Busy begins at 60%; very busy at 85%. These are not verified physical or safety limits.
+All five demo buses have 70 total passenger places, including 25 seats (45 standing places); the driver is excluded. This is a uniform synthetic configuration, not a verified assignment or specification for these real routes. Stop capacities are illustrative: 30, or 60 for shared 33/42 stops. Busy begins at 60%; very busy at 85%. These are not verified physical or safety limits.
 
 The predictor combines a historical time profile with the residual from the latest stop count and estimated effects of approaching buses. Bus forecasts use historical positive/negative net onboard changes and observed demand. All are demonstration estimates, not field-validated ML results. Observations older than two simulated minutes are marked stale; missing readings never become fresh zeroes.
 
@@ -102,6 +103,8 @@ The Politecnico paper, *A low-cost automatic people-counting system at bus stops
 - 2026-10-11: History visible only in operator UI for this demo; server authentication is a future access-control requirement.
 - 2026-10-11: Evaluate synthetic forecasts with independent training, calibration and test weeks; label all reliability as synthetic.
 - 2026-10-11: Finish and publish frontend v2 independently; postpone backend and Arduino integration until a later project phase.
+
+- 2026-10-11: Publish the uniform 70-total / 25-seated fleet on `frontend-v2-capacity-70`, preserving previous branches and their exact commits. Stop-demand changes remain pending; this iteration changes bus capacity only.
 
 ## Remaining work
 

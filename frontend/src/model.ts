@@ -5,7 +5,7 @@ import { addScore, busPeopleAt, predictStop } from './predictions.ts';
 type Pending = { due: number; horizon: Horizon; kind: 'stop' | 'bus'; id: string; tripId?: string; people: number; capacity: number };
 export const SPLIT_SEEDS = [1000, 11000, 21000];
 export function buildModel(network: Network, scenario: Scenario, progress: (message: string) => void = () => {}): Model {
- const model: Model = { version: 'synthetic-baseline-v2', scenario, levels: {}, netGains: {}, netLosses: {}, history: [], busHistory: [], evaluation: { calibration: [], test: [], daysPerSplit: 7, splitSeeds: SPLIT_SEEDS, scenario } };
+ const model: Model = { version: 'synthetic-baseline-v2-capacity-70', scenario, levels: {}, netGains: {}, netLosses: {}, history: [], busHistory: [], evaluation: { calibration: [], test: [], daysPerSplit: 7, splitSeeds: SPLIT_SEEDS, scenario } };
  const sums = new Map<string, { sum: number; n: number }>();
  const passageStats = new Map<string, { board: number; alight: number; n: number }>();
  for (let split = 0; split < 3; split++) {
@@ -48,7 +48,7 @@ export function buildModel(network: Network, scenario: Scenario, progress: (mess
      const capacity = new Map<string, number>();
      for (const bus of observation.buses) {
       const line = network.lines.find(l => l.id === bus.lineId)!;
-      for (let i = bus.nextStopIndex; i < line.stops.length && bus.etaMinutes + (i - bus.nextStopIndex) * 3.75 <= 10; i++) capacity.set(line.stops[i].id, (capacity.get(line.stops[i].id) ?? 0) + Math.max(0, 75 - bus.people));
+      for (let i = bus.nextStopIndex; i < line.stops.length && bus.etaMinutes + (i - bus.nextStopIndex) * 3.75 <= 10; i++) capacity.set(line.stops[i].id, (capacity.get(line.stops[i].id) ?? 0) + Math.max(0, bus.capacity - bus.people));
      }
      for (const stop of observation.stops) {
       const row = hourlyRows.get(stop.id)!;

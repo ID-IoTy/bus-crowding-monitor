@@ -2,6 +2,9 @@ import type { Bus, Network, Scenario, Stop } from './types.ts';
 
 export const SIM_START = '2026-10-11T06:00:00.000Z'; // 08:00 Europe/Rome
 export const HORIZONS = [5, 10, 15] as const;
+// Uniform synthetic fleet: seated places are included in total passenger capacity.
+export const DEMO_BUS_CAPACITY = 70;
+export const DEMO_BUS_SEATS = 25;
 export const clamp = (n: number, max = Infinity) => Math.max(0, Math.min(max, n));
 export function rng(seed: number) { let a = seed >>> 0; return () => { a += 0x6D2B79F5; let t = a; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 export function category(people: number, capacity: number) { return people / capacity >= .85 ? 'Very busy' as const : people / capacity >= .6 ? 'Busy' as const : 'Comfortable' as const; }
@@ -61,7 +64,7 @@ export class Simulation {
    ['BUS-6801', '68U-0', 7, 150, 25], ['BUS-3301', '33U-0', sharedStart, 180, 63], ['BUS-4201', '42U-0', shared42, 480, 24]
   ].map(([id, lineId, index, due, people]) => {
    const line = network.lines.find(l => l.id === lineId)!;
-   const next = Math.max(1, Number(index)); const count = Math.round(clamp(Number(people) + (scenario === 'rush' ? 12 : scenario === 'overcrowded' ? 22 : 0), 75));
+   const next = Math.max(1, Number(index)); const count = Math.round(clamp(Number(people) + (scenario === 'rush' ? 12 : scenario === 'overcrowded' ? 22 : 0), DEMO_BUS_CAPACITY));
    return { id: String(id), lineId: String(lineId), next, due: Number(due), phase: 'moving' as const, people: count, observedPeople: count, observedAt: 0, trip: 1, manifest: { [line.stops[Math.min(next + 5, line.stops.length - 1)].id]: count } };
   });
   for (const stop of this.stops) stop.waiting = this.truth(stop.id);
@@ -97,7 +100,7 @@ export class Simulation {
      const alighted = vehicle.manifest[stop.id] ?? 0; delete vehicle.manifest[stop.id]; vehicle.people -= alighted;
      let boarded = 0;
      for (const group of this.queues.get(stop.id)!) if (group.eligible.includes(line.id)) {
-      const take = Math.min(group.count, 75 - vehicle.people); group.count -= take; boarded += take; vehicle.people += take;
+      const take = Math.min(group.count, DEMO_BUS_CAPACITY - vehicle.people); group.count -= take; boarded += take; vehicle.people += take;
       vehicle.manifest[group.destination] = (vehicle.manifest[group.destination] ?? 0) + take;
      }
      this.passages.push({ lineId: line.id, stopId: stop.id, boarded, alighted, time: this.now() });
@@ -120,7 +123,7 @@ export class Simulation {
    const line = this.network.lines.find(l => l.id === v.lineId)!;
    const before = line.stops[v.next - 1]; const after = line.stops[v.next];
    const fraction = v.phase === 'dwelling' ? 1 : clamp(1 - (v.due - this.seconds) / 180, 1);
-   return { id: v.id, tripId: `${v.id}-${v.trip}`, lineId: v.lineId, people: v.observedPeople, observedAt: new Date(new Date(this.start).getTime() + v.observedAt * 1000).toISOString(), seats: 32, capacity: 75, nextStopIndex: v.next + (v.phase === 'dwelling' ? 1 : 0), etaMinutes: (v.phase === 'dwelling' ? v.due - this.seconds + 180 : v.due - this.seconds) / 60, status: v.phase, position: { lat: before.lat + (after.lat - before.lat) * fraction, lon: before.lon + (after.lon - before.lon) * fraction } };
+   return { id: v.id, tripId: `${v.id}-${v.trip}`, lineId: v.lineId, people: v.observedPeople, observedAt: new Date(new Date(this.start).getTime() + v.observedAt * 1000).toISOString(), seats: DEMO_BUS_SEATS, capacity: DEMO_BUS_CAPACITY, nextStopIndex: v.next + (v.phase === 'dwelling' ? 1 : 0), etaMinutes: (v.phase === 'dwelling' ? v.due - this.seconds + 180 : v.due - this.seconds) / 60, status: v.phase, position: { lat: before.lat + (after.lat - before.lat) * fraction, lon: before.lon + (after.lon - before.lon) * fraction } };
   }) };
  }
 }

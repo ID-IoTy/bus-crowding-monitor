@@ -11,7 +11,8 @@ const network: Network = JSON.parse(readFileSync(new URL('../public/network.json
 const emptyModel: Model = { version: 'test', scenario: 'normal', levels: {}, netGains: {}, netLosses: {}, history: [], busHistory: [], evaluation: { calibration: [], test: [], splitSeeds: [1, 2, 3], daysPerSplit: 7, scenario: 'normal' } };
 
 test('capacity boundaries and categories use total capacity, not seats', () => {
- assert.equal(remainingCapacity({ people: 80, capacity: 75 }), 0); assert.equal(excessDemand(25, { people: 65, capacity: 75 }), 15);
+ assert.equal(remainingCapacity({ people: 80, capacity: 70 }), 0); assert.equal(excessDemand(25, { people: 65, capacity: 70 }), 20);
+ assert.equal(occupancy({ people: 35, capacity: 70 }), 50);
  assert.equal(occupancy({ people: 0, capacity: 0 }), null); assert.equal(category(18, 30), 'Busy'); assert.equal(category(26, 30), 'Very busy');
 });
 test('network deduplicates shared stops and keeps opposite directions separate', () => {
@@ -22,6 +23,7 @@ test('network deduplicates shared stops and keeps opposite directions separate',
 test('five buses, directional compatibility and shared-stop recommendations', () => {
  const state = snapshot(new Simulation(network, 'normal'), emptyModel);
  assert.equal(state.buses.length, 5); assert.equal(state.buses.filter(b => b.lineId === '18U-0').length, 2);
+ assert.ok(state.buses.every(b => b.capacity === 70 && b.seats === 25));
  const options = compatibleArrivals(state, '3380', '3696'); assert.deepEqual(options.map(o => o.line.name), ['33', '42']);
  assert.ok(options[0].prediction.people > options[1].prediction.people);
  assert.equal(compatibleArrivals(state, '3696', '3380').length, 0);

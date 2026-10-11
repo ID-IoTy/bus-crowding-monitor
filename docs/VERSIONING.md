@@ -24,3 +24,17 @@ No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-
 ## Visual variation
 
 `frontend-v2-clean-map` starts from completed v2 commit `b08777bb03a81dfe018ef76447e188fb846bc7ee`. It contains presentation refinements only; `frontend-v2` remains recoverable unchanged. Integration is still deferred.
+
+## Capacity iteration and recovery index
+
+The active iteration is `frontend-v2-capacity-70`, based on clean-map commit `c478f111c6ebfa97e8433676e4563ed022e7a0d4`. Earlier branches remain unchanged.
+
+| Iteration | Preserved branch | Exact starting or completed commit |
+| --- | --- | --- |
+| Initial three-bus demo | `frontend` | `596f559085c134f471c79c26be38c877b0738751` |
+| Completed frontend v2 | `frontend-v2` | `b08777bb03a81dfe018ef76447e188fb846bc7ee` |
+| Compact map, 75 total / 32 seated | `frontend-v2-clean-map` | `c478f111c6ebfa97e8433676e4563ed022e7a0d4` |
+| Compact map, 70 total / 25 seated | `frontend-v2-capacity-70` | Branch history contains the capacity change as a separate commit |
+
+For each future iteration, keep the last delivered branch frozen and create a new working branch from its verified head. Record the source SHA and the change here. Recover a previous iteration in a separate clone using `git switch --detach <exact-commit-sha>`, or create a new branch from that SHA. Use that iteration's lockfile and README; do not reset or force-push a shared branch. Integration remains deferred.
+
