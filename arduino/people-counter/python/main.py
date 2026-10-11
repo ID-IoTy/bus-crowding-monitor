@@ -19,6 +19,7 @@ import threading
 import time
 
 from server_client import ServerReporter
+from gateway_server import start_gateway
 
 # ============================================================================
 # CONFIGURAZIONE
@@ -50,6 +51,8 @@ PERIODIC_INTERVAL = float(os.environ.get("PERIODIC_INTERVAL", "60"))
 
 # Numero corrente di persone rilevate nell'ultimo frame
 current_people_count = 0
+last_frame_at = None
+last_display = None
 
 # Lock per sincronizzazione thread-safe
 count_lock = threading.Lock()
@@ -108,7 +111,7 @@ def count_people_in_frame(detections: dict):
             ]
         }
     """
-    global current_people_count
+    global current_people_count, last_frame_at
     
     # Conta quante persone sono state rilevate in questo frame
     people_detected = 0
@@ -135,6 +138,7 @@ def count_people_in_frame(detections: dict):
     with count_lock:
         previous_count = current_people_count
         current_people_count = people_detected
+        last_frame_at = datetime.now(UTC).isoformat()
         
         # Stampa il conteggio solo se è cambiato
         if current_people_count != previous_count:
@@ -274,7 +278,17 @@ monitor_thread = threading.Thread(target=system_monitor, daemon=True)
 monitor_thread.start()
 
 # Avvia thread di invio al backend centrale
-reporter.start()
+if os.environ.get('REPORTING_MODE', 'gateway') == 'push':
+    reporter.start()
+else:
+    def gateway_reading():
+        with count_lock:
+            return None if last_frame_at is None else {'count': current_people_count, 'measured_at': last_frame_at}
+    def gateway_display(payload):
+        global last_display
+        last_display = payload
+        ui.send_message('forecast_display', message=payload)
+    start_gateway(gateway_reading, gateway_display, int(os.environ.get('GATEWAY_PORT', '8080')))
 
 # Messaggio di avvio
 print("\nApplicazione avviata!")
@@ -284,3 +298,4 @@ print("\nIn attesa di rilevamenti...\n")
 
 # Avvia l'applicazione (loop principale)
 App.run()
+

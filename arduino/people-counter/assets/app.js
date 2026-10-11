@@ -5,6 +5,16 @@
 
 const ui = new WebUI();
 
+ui.on_message('forecast_display', (payload) => {
+    const target = document.getElementById('forecast-display');
+    if (!target || !Array.isArray(payload.buses)) return;
+    target.replaceChildren(...payload.buses.map(bus => {
+        const row = document.createElement('p');
+        row.textContent = `Line ${bus.line_id} · ${Math.ceil(bus.eta_s / 60)} min · ${bus.level} · predicted after departure ${bus.predicted_onboard} people · Reliability unavailable${bus.may_not_fit ? ' · You may not be able to board' : ''}`;
+        return row;
+    }));
+});
+
 const state = {
     currentCount: 0,
     maxCount: 0,
@@ -159,3 +169,4 @@ function setThreshold(percent) {
 el.slider.addEventListener('input', () => setThreshold(el.slider.value));
 el.input.addEventListener('change', () => setThreshold(el.input.value));
 el.resetButton.addEventListener('click', () => setThreshold(40));
+
