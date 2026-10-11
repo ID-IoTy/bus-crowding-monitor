@@ -6,6 +6,7 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 | Branch | Purpose |
 | --- | --- |
+| `frontend-v3-minimal` | Current logo-only interface: no sidebar, introductory header or scenario controls; views selected through URL hashes |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
 | `frontend-v3-journey` | Current stop-first passenger planner: optional destination/date, three scheduled services and after-departure forecasts |
 | `frontend-v3-side-map` | Current layout variation: journey search, cards and details on the left; persistent map on the right |
@@ -24,6 +25,8 @@ The initial demo remains recoverable from its branch and exact commit. The plann
 Choose a departure stop by name, code or zooming into the map. Destination is optional: when provided, only direct services reaching it after departure in the same direction appear. Date/time is optional and interpreted in Europe/Rome; **Now** uses the simulated clock. Future dates are supported. No transfers are planned.
 
 The `frontend-v3-side-map` variation places search, route options and selected bus/stop details in a left column, with a sticky map on the right. At viewport widths of 760px or less the columns stack vertically. The original `frontend-v3-journey` remains preserved at `5dda674b54e005ec369ab3754fcc974fef028a58`.
+
+The `frontend-v3-minimal` iteration retains that layout while removing the sidebar, interface buttons, introductory text, clock header, fleet badge and scenario/Pause/Reset toolbar. Only the Transit logo remains above the workspace. Open `/#citizens` for the passenger app or `/#operators` for the control room; URL hash changes switch views. The normal scenario runs automatically, advancing the simulated clock as before. The optional journey time field and Now action remain available. The previous side-map layout is preserved at `31461bc1e824c7e96990e3e532b96840db537b58`.
 
 Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for observed counts, arrival/departure estimates and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
 
@@ -58,7 +61,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v3-side-map for this iteration, then:
+# Check out frontend-v3-minimal for this iteration, then:
 cd frontend
 npm ci
 npm run dev
@@ -72,7 +75,7 @@ npm test
 npm run build
 ```
 
-The first scenario prepares three independent synthetic weeks in a Web Worker (approximately 10–20 seconds on the development machine). Subsequent switches to an already prepared scenario reuse the model in that tab. UI polling every five seconds advances simulation by thirty seconds. Pause and reset are available. Separate browser tabs have independent simulation state.
+The model prepares three independent synthetic weeks in a Web Worker (approximately 10–20 seconds on the development machine). UI polling every five seconds advances simulation by thirty seconds. The minimal shell runs the normal scenario automatically; scenario, pause and reset controls remain available in earlier iterations. Separate browser tabs have independent simulation state.
 
 ## Observations, predictions and interpretation
 
