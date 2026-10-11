@@ -6,6 +6,7 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 | Branch | Purpose |
 | --- | --- |
+| `frontend-v3-desktop-fit` | Current desktop layout: viewport-sized map and compact controls, one direction's three trips at a time, details in dialogs |
 | `frontend-v3-minimal` | Current logo-only interface: no sidebar, introductory header or scenario controls; views selected through URL hashes |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
 | `frontend-v3-journey` | Current stop-first passenger planner: optional destination/date, three scheduled services and after-departure forecasts |
@@ -27,6 +28,8 @@ Choose a departure stop by name, code or zooming into the map. Destination is op
 The `frontend-v3-side-map` variation places search, route options and selected bus/stop details in a left column, with a sticky map on the right. At viewport widths of 760px or less the columns stack vertically. The original `frontend-v3-journey` remains preserved at `5dda674b54e005ec369ab3754fcc974fef028a58`.
 
 The `frontend-v3-minimal` iteration retains that layout while removing the sidebar, interface buttons, introductory text, clock header, fleet badge and scenario/Pause/Reset toolbar. Only the Transit logo remains above the workspace. Open `/#citizens` for the passenger app or `/#operators` for the control room; URL hash changes switch views. The normal scenario runs automatically, advancing the simulated clock as before. The optional journey time field and Now action remain available. The previous side-map layout is preserved at `31461bc1e824c7e96990e3e532b96840db537b58`.
+
+The `frontend-v3-desktop-fit` iteration sizes the passenger workspace to the desktop window, compacts the search fields and displays three trips for one direction at a time. A line/direction selector exposes every compatible option without stacking cards down the left column. Selecting a bus or stop opens a dismissible detail dialog; About demo retains the synthetic-service explanation without adding page height. Small screens retain a vertical, scrollable layout. The previous minimal shell is preserved at `e2c80029697bfc3b1f77d48610de00ef9250579a`.
 
 Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for observed counts, arrival/departure estimates and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
 
@@ -61,7 +64,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v3-minimal for this iteration, then:
+# Check out frontend-v3-desktop-fit for this iteration, then:
 cd frontend
 npm ci
 npm run dev

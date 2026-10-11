@@ -72,3 +72,49 @@
 .minimal-brand .brand-mark{width:38px;height:40px;border-radius:10px}
 .minimal-brand .brand-dot{color:#789440;display:inline;align-self:center}
 @media(max-width:640px){.app-minimal .page{padding:14px 16px 18px}.minimal-header{margin-bottom:16px}.minimal-brand{font-size:25px}}
+
+.journey-route-picker{display:block;font-size:11px;color:#526c5c;margin-bottom:8px}.journey-route-picker select{margin-top:5px}
+.journey-dialog{padding:0;border:0;border-radius:12px;width:min(650px,calc(100vw - 32px));max-height:calc(100dvh - 40px);color:var(--ink);background:white;box-shadow:0 14px 60px #1235}
+.journey-dialog::backdrop{background:#1239}.journey-dialog .journey-detail{margin:0}.journey-dialog .journey-detail-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.journey-about-button{margin-left:auto;order:3;white-space:nowrap}.journey-dialog .journey-disclaimer{margin:0}
+@media(min-width:761px){
+ .app-passenger .page{height:100dvh;display:flex;flex-direction:column;padding:12px 24px 14px}
+ .app-passenger .minimal-header{flex:none;min-height:40px;margin-bottom:12px}
+ .app-passenger .passenger-journey{flex:1;min-height:0}
+ .app-passenger .page-footer{display:none}
+ .app-passenger .journey-workspace{height:100%;align-items:stretch;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:18px}
+ .app-passenger .journey-controls{height:100%;gap:10px;min-height:0}
+ .app-passenger .journey-search{flex:none;padding:12px 15px}
+ .app-passenger .journey-search .panel-title{margin-bottom:10px}
+ .app-passenger .journey-search .eyebrow,.app-passenger .journey-search .subtle-badge{display:none}
+ .app-passenger .journey-search h2{font-size:16px;margin:0}
+ .app-passenger .journey-search-grid{gap:8px}
+ .app-passenger .journey-search label{font-size:11px;margin-bottom:4px}
+ .app-passenger .search-input-row input{padding:8px 10px;font-size:11px;height:34px}
+ .app-passenger .search-input-row button{min-height:34px}
+ .app-passenger .journey-datetime>small{margin-top:4px;font-size:9px}
+ .app-passenger .journey-options{flex:1;min-height:0;display:flex;flex-direction:column}
+ .app-passenger .journey-options .section-heading{margin-bottom:6px}
+ .app-passenger .journey-options .section-heading h2{font-size:15px}
+ .app-passenger .journey-options .section-heading p{display:none}
+ .app-passenger .journey-route-picker{flex:none}
+ .app-passenger .journey-route-picker select{padding:7px 25px 7px 9px;min-height:32px}
+ .app-passenger .journey-route-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:0}
+ .app-passenger .journey-route-card{flex:1;min-height:0;padding:10px 12px;display:flex;flex-direction:column}
+ .app-passenger .journey-route-heading{padding-bottom:6px;flex:none;gap:8px}
+ .app-passenger .journey-route-heading strong{font-size:12px}
+ .app-passenger .journey-route-heading small{display:none}
+ .app-passenger .journey-trip-list{flex:1;min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:6px}
+ .app-passenger .journey-trip{margin:0;padding:6px 8px;gap:6px;min-height:0}
+ .app-passenger .journey-trip strong{font-size:12px}.app-passenger .trip-occupancy strong{font-size:21px}
+ .app-passenger .journey-trip small{margin-top:2px;font-size:9px;line-height:1.3}
+ .app-passenger .journey-trip>.boarding-warning{font-size:9px;line-height:1.2}
+ .app-passenger .journey-route-card>.explanation{font-size:9px;margin-top:6px;line-height:1.4;flex:none}
+ .app-passenger .journey-map-panel{position:static;height:100%;display:flex;flex-direction:column}
+ .app-passenger .journey-map-wrap{flex:1;min-height:0;display:flex;flex-direction:column}
+ .app-passenger .journey-map{flex:1;min-height:0;height:auto}
+ .app-passenger .journey-map-key{flex:none;font-size:10px;padding:8px 12px}
+ .app-passenger .map-toolbar{flex:none;gap:7px;padding:10px 12px}
+ .app-passenger .map-toolbar strong{font-size:12px}.app-passenger .map-context{font-size:10px;margin-top:3px}
+}
+@media(max-width:640px){.journey-dialog .journey-detail-grid{grid-template-columns:1fr}}

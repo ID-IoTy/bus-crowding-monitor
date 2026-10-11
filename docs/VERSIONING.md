@@ -10,7 +10,7 @@ The planned `v0.1.0-demo` tag and "Initial frontend demo" release are pending, n
 
 ## Workflow
 
-Current status: `frontend-v3-minimal` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
+Current status: `frontend-v3-desktop-fit` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
 
 1. Commit v2 work on `frontend-v2`, preserving the baseline branch.
 2. Open component PRs targeting `integration`, in order: frontend-v2, backend, Arduino.
@@ -27,7 +27,7 @@ No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-
 
 ## Capacity iteration and recovery index
 
-The active layout iteration is `frontend-v3-minimal`, created from side-map commit `31461bc1e824c7e96990e3e532b96840db537b58`. Earlier branches remain unchanged.
+The active layout iteration is `frontend-v3-desktop-fit`, created from minimal-shell commit `e2c80029697bfc3b1f77d48610de00ef9250579a`. Earlier branches remain unchanged.
 
 | Iteration | Preserved branch | Exact starting or completed commit |
 | --- | --- | --- |
@@ -37,7 +37,8 @@ The active layout iteration is `frontend-v3-minimal`, created from side-map comm
 | Compact map, 70 total / 25 seated | `frontend-v2-capacity-70` | `536b3d0022264125434b4603406282776bee7395` |
 | Stop-first passenger planner | `frontend-v3-journey` | `5dda674b54e005ec369ab3754fcc974fef028a58` |
 | Passenger cards left, map right | `frontend-v3-side-map` | `31461bc1e824c7e96990e3e532b96840db537b58` |
-| Logo-only shell, URL interface selection | `frontend-v3-minimal` | Starts at `31461bc1e824c7e96990e3e532b96840db537b58` |
+| Logo-only shell, URL interface selection | `frontend-v3-minimal` | `e2c80029697bfc3b1f77d48610de00ef9250579a` |
+| Desktop window fit and detail dialogs | `frontend-v3-desktop-fit` | Starts at `e2c80029697bfc3b1f77d48610de00ef9250579a` |
 
 For each future iteration, keep the last delivered branch frozen and create a new working branch from its verified head. Record the source SHA and the change here. Recover a previous iteration in a separate clone using `git switch --detach <exact-commit-sha>`, or create a new branch from that SHA. Use that iteration's lockfile and README; do not reset or force-push a shared branch. Integration remains deferred.
 
