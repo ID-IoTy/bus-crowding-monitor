@@ -6,7 +6,8 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 | Branch | Purpose |
 | --- | --- |
-| `frontend-v3-green-panel` | Current presentation: dark green backing behind the passenger logo and left controls, with unchanged journey behaviour |
+| `frontend-v3-place-search` | Current passenger iteration: online address/place search suggests nearby compatible demo stops |
+| `frontend-v3-green-panel` | Preserved presentation: dark green backing behind the passenger logo and left controls, with unchanged journey behaviour |
 | `frontend-v3-compact-bus` | Preserved map: compact bus markers, colour touches the route outline, selected details compare before/after percentages |
 | `frontend-v3-map-contrast` | Preserved map: bus labels show only the line; white route casing with a dark outer edge improves contrast |
 | `frontend-v3-inline-bus` | Preserved layout: selected bus expands its left-hand card with observed count, after-departure prediction and occupancy percentage |
@@ -41,7 +42,11 @@ The `frontend-v3-map-contrast` variation removes trip ordinal suffixes from bus 
 
 The `frontend-v3-compact-bus` variation removes the white route casing so colour touches the dark outline, and reduces bus markers to 40 × 26 pixels. Selected bus details show only **Before your stop** and **After your stop** occupancy percentages, computed from predicted arrival and after-departure counts respectively; these are not current observed counts. Unknown capacity produces no percentage. The prior map-contrast iteration remains preserved at `8856db7ada86d43c44b358af71523d2a2ee7ae5c`.
 
-The `frontend-v3-green-panel` iteration adds the original dark green brand colour behind the passenger logo and left controls. White cards and light headings preserve contrast; desktop dimensions and journey behaviour remain unchanged. The working compact-bus iteration is frozen at `5091b708d8e37267c7ad028035f1012ed6a188a1`. Place/address search is a requested next feature, not implemented in this presentation-only iteration.
+The `frontend-v3-green-panel` iteration adds the original dark green brand colour behind the passenger logo and left controls. White cards and light headings preserve contrast; desktop dimensions and journey behaviour remain unchanged. The working compact-bus iteration is frozen at `5091b708d8e37267c7ad028035f1012ed6a188a1`. Place/address search is implemented separately in the following iteration.
+
+The `frontend-v3-place-search` iteration adds **Stops / Addresses & places** search modes. Enter an address or place in the Turin area, press **Search** (or Enter), select the matching place, then choose one of up to five closest compatible stops within 1.5 km. Distances use the haversine formula and are straight-line distances, not walking routes or times. Only imported demo stops are eligible; nearby stops incompatible with the other selected endpoint are excluded using ordered route patterns. No transfers or automatic endpoint selection are introduced. Both modes retain the selected stop IDs, optional destination, date/time, three services and bus-selection behaviour.
+
+Online geocoding uses the [Photon public demo](https://github.com/komoot/photon#demo-server), backed by OpenStreetMap. It is intended here for a small hackathon demo: availability is not guaranteed and excessive usage can be throttled. Searches happen only on explicit submission, with per-tab serialization, at least 1.1 seconds between geocoding requests, a 100-query memory cache and a 12-second request timeout. No device location is requested. The UI discloses that queries are sent to Photon and provides OpenStreetMap attribution. On failure, use the existing Stops mode. The API endpoint can be changed via `frontend/public/place-search-config.json` (same Photon-compatible response schema). For a public multi-user deployment, use a controlled proxy or your own/commercial geocoder and application-wide rate limiting; the browser demo does not enforce a global rate across clients. The green-only presentation remains separately preserved at `f4ae391ba8bab43ba0e0c0948b4006ec9f670f5d`.
 
 Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for the same inline observed count, after-departure estimate and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
 
@@ -76,7 +81,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v3-green-panel for this iteration, then:
+# Check out frontend-v3-place-search for this iteration, then:
 cd frontend
 npm ci
 npm run dev

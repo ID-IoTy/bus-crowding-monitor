@@ -10,7 +10,7 @@ The planned `v0.1.0-demo` tag and "Initial frontend demo" release are pending, n
 
 ## Workflow
 
-Current status: `frontend-v3-green-panel` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
+Current status: `frontend-v3-place-search` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
 
 1. Commit v2 work on `frontend-v2`, preserving the baseline branch.
 2. Open component PRs targeting `integration`, in order: frontend-v2, backend, Arduino.
@@ -27,7 +27,7 @@ No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-
 
 ## Capacity iteration and recovery index
 
-The active presentation iteration is `frontend-v3-green-panel`, based on compact-bus commit `5091b708d8e37267c7ad028035f1012ed6a188a1`. The working compact-bus version is frozen; this iteration changes only passenger colours and visual backing. Earlier branches remain unchanged.
+The active iteration is `frontend-v3-place-search`, based on the separately preserved green-panel presentation. It adds online place geocoding and nearby compatible demo stops. The working compact-bus version remains frozen at `5091b708d8e37267c7ad028035f1012ed6a188a1`. Earlier branches remain unchanged.
 
 | Iteration | Preserved branch | Exact starting or completed commit |
 | --- | --- | --- |
@@ -42,7 +42,8 @@ The active presentation iteration is `frontend-v3-green-panel`, based on compact
 | Inline selected bus and clean percentages | `frontend-v3-inline-bus` | `d63896fe6282903e142ec6a1bc19ec97916941dc` |
 | Route contrast and line-only bus labels | `frontend-v3-map-contrast` | `8856db7ada86d43c44b358af71523d2a2ee7ae5c` |
 | Compact markers and before/after percentages | `frontend-v3-compact-bus` | `5091b708d8e37267c7ad028035f1012ed6a188a1` |
-| Dark green passenger panel backing | `frontend-v3-green-panel` | Starts at `5091b708d8e37267c7ad028035f1012ed6a188a1` |
+| Dark green passenger panel backing | `frontend-v3-green-panel` | `f4ae391ba8bab43ba0e0c0948b4006ec9f670f5d` |
+| Address/place search and nearby stops | `frontend-v3-place-search` | Starts at `f4ae391ba8bab43ba0e0c0948b4006ec9f670f5d` |
 
 For each future iteration, keep the last delivered branch frozen and create a new working branch from its verified head. Record the source SHA and the change here. Recover a previous iteration in a separate clone using `git switch --detach <exact-commit-sha>`, or create a new branch from that SHA. Use that iteration's lockfile and README; do not reset or force-push a shared branch. Integration remains deferred.
 

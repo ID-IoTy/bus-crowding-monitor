@@ -158,3 +158,36 @@
  .app-passenger .minimal-header{background:#153c34;border-radius:12px;padding:12px}
  .app-passenger .journey-controls{background:#153c34;border-radius:14px;padding:12px}
 }
+
+.journey-search-mode{display:flex;gap:3px;background:#eff3ea;border-radius:6px;padding:3px;grid-column:1/-1}
+.journey-search-mode button{flex:1;padding:5px 8px;border-radius:4px;color:#526c5c;background:transparent;font-size:11px}
+.journey-search-mode button.selected{background:white;color:#173e34;box-shadow:0 1px 4px #173e3412}
+.chosen-nearby-stop{display:block;max-width:100%;background:transparent;color:#526c5c;text-align:left;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:4px 0 0}
+.place-results p{font-size:11px;line-height:1.5;padding:10px 12px;color:#526c5c}
+.place-results .place-credit{font-size:9px;border-top:1px solid #edf1e9}
+.place-results .nearby-heading{background:#eff5e6}
+.place-search .search-input-row input{min-width:0;flex:1}
+.place-search .search-input-row button{flex:none;font-size:10px;padding:4px}
+@media(min-width:761px){.app-passenger .journey-search-mode button{padding:3px 6px;font-size:10px}.app-passenger .place-search label{font-size:10px}}
+
+@media(min-width:761px) and (max-height:700px){
+ .app-passenger .journey-search{padding:9px 12px}
+ .app-passenger .journey-search .panel-title{margin-bottom:7px}
+ .app-passenger .journey-search-grid{gap:5px}
+ .app-passenger .journey-search label{font-size:10px;line-height:1.2;margin-bottom:3px}
+ .app-passenger .search-input-row input{height:28px;padding:5px 8px}
+ .app-passenger .search-input-row button{min-height:28px}
+ .app-passenger .journey-search-mode button{padding:2px 5px}
+ .app-passenger .chosen-nearby-stop{padding-top:2px;line-height:1.2}
+ .app-passenger .journey-datetime>small{margin-top:3px;line-height:1.2}
+ .app-passenger .journey-controls{gap:8px}
+ .app-passenger .journey-trip{padding:5px 7px}
+}
+
+@media(min-width:761px) and (max-height:700px){
+ .app-passenger .journey-search-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-passenger .journey-datetime{grid-column:1/-1}
+ .app-passenger .place-search .search-input-row input{width:0}
+ .app-passenger .place-search .stop-search-results{min-width:280px}
+ .app-passenger .place-search:nth-of-type(3) .stop-search-results{left:auto}
+}
