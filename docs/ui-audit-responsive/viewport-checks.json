@@ -1,0 +1,202 @@
+[
+  {
+    "document": [
+      305,
+      1857
+    ],
+    "inputFont": "16px",
+    "trips": [
+      {
+        "content": 89,
+        "h": 89
+      },
+      {
+        "content": 89,
+        "h": 89
+      },
+      {
+        "content": 89,
+        "h": 89
+      }
+    ],
+    "viewport": [
+      320,
+      740
+    ]
+  },
+  {
+    "document": [
+      375,
+      1777
+    ],
+    "inputFont": "16px",
+    "trips": [
+      {
+        "content": 73,
+        "h": 73
+      },
+      {
+        "content": 73,
+        "h": 73
+      },
+      {
+        "content": 73,
+        "h": 73
+      }
+    ],
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "document": [
+      753,
+      1648
+    ],
+    "inputFont": "16px",
+    "trips": [
+      {
+        "content": 72,
+        "h": 72
+      },
+      {
+        "content": 72,
+        "h": 72
+      },
+      {
+        "content": 72,
+        "h": 72
+      }
+    ],
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "document": [
+      980,
+      720
+    ],
+    "inputFont": "12px",
+    "trips": [
+      {
+        "content": 74,
+        "h": 74
+      },
+      {
+        "content": 74,
+        "h": 74
+      },
+      {
+        "content": 74,
+        "h": 74
+      }
+    ],
+    "viewport": [
+      980,
+      720
+    ]
+  },
+  {
+    "document": [
+      1280,
+      720
+    ],
+    "inputFont": "12px",
+    "trips": [
+      {
+        "content": 71,
+        "h": 71
+      },
+      {
+        "content": 71,
+        "h": 71
+      },
+      {
+        "content": 71,
+        "h": 71
+      }
+    ],
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  {
+    "document": [
+      1366,
+      600
+    ],
+    "inputFont": "12px",
+    "trips": [
+      {
+        "content": 49,
+        "h": 49
+      },
+      {
+        "content": 49,
+        "h": 49
+      },
+      {
+        "content": 49,
+        "h": 49
+      }
+    ],
+    "viewport": [
+      1366,
+      600
+    ]
+  },
+  {
+    "document": [
+      1440,
+      900
+    ],
+    "inputFont": "13px",
+    "trips": [
+      {
+        "content": 56,
+        "h": 56
+      },
+      {
+        "content": 56,
+        "h": 56
+      },
+      {
+        "content": 56,
+        "h": 56
+      }
+    ],
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "document": [
+      1920,
+      1080
+    ],
+    "inputFont": "13px",
+    "trips": [
+      {
+        "content": 115,
+        "h": 115
+      },
+      {
+        "content": 115,
+        "h": 115
+      },
+      {
+        "content": 115,
+        "h": 115
+      }
+    ],
+    "viewport": [
+      1920,
+      1080
+    ]
+  }
+]
