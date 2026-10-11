@@ -1,0 +1,1561 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bus Crowding Monitor P0",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lines": {
+      "get": {
+        "summary": "Lines",
+        "operationId": "lines_api_lines_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stops": {
+      "get": {
+        "summary": "Stops",
+        "operationId": "stops_api_stops_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StopView"
+                  },
+                  "type": "array",
+                  "title": "Response Stops Api Stops Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lines/{line_id}": {
+      "get": {
+        "summary": "Line",
+        "operationId": "line_api_lines__line_id__get",
+        "parameters": [
+          {
+            "name": "line_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Line Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stops/{stop_id}": {
+      "get": {
+        "summary": "Stop",
+        "operationId": "stop_api_stops__stop_id__get",
+        "parameters": [
+          {
+            "name": "stop_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Stop Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StopView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vehicles": {
+      "get": {
+        "summary": "Vehicles",
+        "operationId": "vehicles_api_vehicles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vehicles/{vehicle_id}": {
+      "get": {
+        "summary": "Vehicle",
+        "operationId": "vehicle_api_vehicles__vehicle_id__get",
+        "parameters": [
+          {
+            "name": "vehicle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Vehicle Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/journey": {
+      "get": {
+        "summary": "Journey",
+        "operationId": "journey_api_journey_get",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "To"
+            }
+          },
+          {
+            "name": "requested_at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Requested At"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/operator/alerts": {
+      "get": {
+        "summary": "Alerts",
+        "operationId": "alerts_api_operator_alerts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/operator/alerts/{alert_id}/ack": {
+      "post": {
+        "summary": "Acknowledge",
+        "operationId": "acknowledge_api_operator_alerts__alert_id__ack_post",
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Alert Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/state": {
+      "get": {
+        "summary": "State",
+        "operationId": "state_sim_state_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/clock": {
+      "post": {
+        "summary": "Clock",
+        "operationId": "clock_sim_clock_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClockCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/scenarios": {
+      "get": {
+        "summary": "Scenarios",
+        "operationId": "scenarios_sim_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/scenario": {
+      "post": {
+        "summary": "Scenario",
+        "operationId": "scenario_sim_scenario_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/cameras": {
+      "get": {
+        "summary": "Cameras",
+        "operationId": "cameras_sim_cameras_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/cameras/{camera_id}/mode": {
+      "post": {
+        "summary": "Mode",
+        "operationId": "mode_sim_cameras__camera_id__mode_post",
+        "parameters": [
+          {
+            "name": "camera_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Camera Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CameraModeCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/truth": {
+      "get": {
+        "summary": "Truth",
+        "operationId": "truth_sim_truth_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ingest/vehicle/approach": {
+      "post": {
+        "summary": "Approach",
+        "operationId": "approach_ingest_vehicle_approach_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VehicleApproach"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ingest/vehicle/departure": {
+      "post": {
+        "summary": "Departure",
+        "operationId": "departure_ingest_vehicle_departure_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VehicleDeparture"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ingest/camera/observation": {
+      "post": {
+        "summary": "Observation",
+        "operationId": "observation_ingest_camera_observation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CameraObservation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ws-schema": {
+      "get": {
+        "summary": "Schema",
+        "operationId": "schema_api_ws_schema_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WsEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CameraModeCommand": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "simulated",
+              "physical"
+            ],
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "CameraModeCommand"
+      },
+      "CameraObservation": {
+        "properties": {
+          "observation_id": {
+            "type": "string",
+            "title": "Observation Id"
+          },
+          "camera_id": {
+            "type": "string",
+            "title": "Camera Id"
+          },
+          "stop_id": {
+            "type": "string",
+            "title": "Stop Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "simulated",
+              "physical"
+            ],
+            "title": "Source"
+          },
+          "measured_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Measured At"
+          },
+          "waiting_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Waiting Count"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "periodic",
+              "pre_arrival",
+              "post_departure"
+            ],
+            "title": "Trigger"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "visit_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visit Id"
+          },
+          "device_measured_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Measured At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "observation_id",
+          "camera_id",
+          "stop_id",
+          "source",
+          "measured_at",
+          "waiting_count",
+          "trigger"
+        ],
+        "title": "CameraObservation"
+      },
+      "ClockCommand": {
+        "properties": {
+          "speed": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 60.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speed"
+          },
+          "paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paused"
+          }
+        },
+        "type": "object",
+        "title": "ClockCommand"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "JourneyOption": {
+        "properties": {
+          "route": {
+            "$ref": "#/components/schemas/Route"
+          },
+          "trips": {
+            "items": {
+              "$ref": "#/components/schemas/JourneyTrip"
+            },
+            "type": "array",
+            "title": "Trips"
+          },
+          "originIndex": {
+            "type": "integer",
+            "title": "Originindex"
+          },
+          "destinationIndex": {
+            "type": "integer",
+            "title": "Destinationindex"
+          }
+        },
+        "type": "object",
+        "required": [
+          "route",
+          "trips",
+          "originIndex",
+          "destinationIndex"
+        ],
+        "title": "JourneyOption"
+      },
+      "JourneyTrip": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "lineId": {
+            "type": "string",
+            "title": "Lineid"
+          },
+          "vehicleId": {
+            "type": "string",
+            "title": "Vehicleid"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Startsat"
+          },
+          "capacity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity"
+          },
+          "seated_capacity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seated Capacity"
+          },
+          "passages": {
+            "items": {
+              "$ref": "#/components/schemas/Passage"
+            },
+            "type": "array",
+            "title": "Passages"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "positionKind": {
+            "type": "string",
+            "enum": [
+              "simulated-current",
+              "predicted",
+              "not-started"
+            ],
+            "title": "Positionkind"
+          },
+          "observed": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed"
+          },
+          "reliability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reliability"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "lineId",
+          "vehicleId",
+          "startsAt",
+          "capacity",
+          "seated_capacity",
+          "passages",
+          "position",
+          "positionKind",
+          "observed"
+        ],
+        "title": "JourneyTrip"
+      },
+      "JourneyView": {
+        "properties": {
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/JourneyOption"
+            },
+            "type": "array",
+            "title": "Options"
+          },
+          "sim_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Sim Time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "options",
+          "sim_time"
+        ],
+        "title": "JourneyView"
+      },
+      "ObservedValue": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "kind": {
+            "type": "string",
+            "const": "observed",
+            "title": "Kind"
+          },
+          "measured_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measured At"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "simulated",
+                  "physical"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "stale",
+              "missing"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "kind",
+          "measured_at",
+          "source",
+          "status"
+        ],
+        "title": "ObservedValue"
+      },
+      "Passage": {
+        "properties": {
+          "stopId": {
+            "type": "string",
+            "title": "Stopid"
+          },
+          "arrival": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Arrival"
+          },
+          "departure": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Departure"
+          },
+          "arriving": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Arriving"
+          },
+          "leaving": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leaving"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent"
+          },
+          "alighting": {
+            "type": "integer",
+            "title": "Alighting"
+          },
+          "boarding": {
+            "type": "integer",
+            "title": "Boarding"
+          },
+          "leftBehind": {
+            "type": "integer",
+            "title": "Leftbehind"
+          },
+          "may_not_fit": {
+            "type": "boolean",
+            "title": "May Not Fit",
+            "default": false
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "interval_80": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interval 80"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "reliability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reliability"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "kind": {
+            "type": "string",
+            "const": "predicted",
+            "title": "Kind",
+            "default": "predicted"
+          },
+          "basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basis"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stopId",
+          "arrival",
+          "departure",
+          "arriving",
+          "leaving",
+          "percent",
+          "alighting",
+          "boarding",
+          "leftBehind"
+        ],
+        "title": "Passage"
+      },
+      "Position": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "title": "Position"
+      },
+      "Route": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "routeId": {
+            "type": "string",
+            "title": "Routeid"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "headsign": {
+            "type": "string",
+            "title": "Headsign"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color"
+          },
+          "stops": {
+            "items": {
+              "$ref": "#/components/schemas/RouteStop"
+            },
+            "type": "array",
+            "title": "Stops"
+          },
+          "shape": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Shape"
+          },
+          "offsets": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Offsets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "routeId",
+          "name",
+          "description",
+          "direction",
+          "headsign",
+          "color",
+          "stops",
+          "shape",
+          "offsets"
+        ],
+        "title": "Route"
+      },
+      "RouteStop": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lon",
+          "id",
+          "name"
+        ],
+        "title": "RouteStop"
+      },
+      "ScenarioCommand": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "rush_hour",
+              "overcrowding"
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ScenarioCommand"
+      },
+      "StopView": {
+        "properties": {
+          "stop_id": {
+            "type": "string",
+            "title": "Stop Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "waiting": {
+            "$ref": "#/components/schemas/ObservedValue"
+          },
+          "camera": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Camera"
+          },
+          "next_buses": {
+            "items": {
+              "$ref": "#/components/schemas/JourneyOption"
+            },
+            "type": "array",
+            "title": "Next Buses",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "stop_id",
+          "name",
+          "lat",
+          "lon",
+          "waiting",
+          "camera"
+        ],
+        "title": "StopView"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VehicleApproach": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "vehicle_id": {
+            "type": "string",
+            "title": "Vehicle Id"
+          },
+          "trip_id": {
+            "type": "string",
+            "title": "Trip Id"
+          },
+          "line_id": {
+            "type": "string",
+            "title": "Line Id"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "next_stop_id": {
+            "type": "string",
+            "title": "Next Stop Id"
+          },
+          "stop_sequence": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Stop Sequence"
+          },
+          "eta_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Eta S"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "onboard": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Onboard"
+          },
+          "sim_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Sim Time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "vehicle_id",
+          "trip_id",
+          "line_id",
+          "direction",
+          "next_stop_id",
+          "stop_sequence",
+          "eta_s",
+          "lat",
+          "lon",
+          "onboard",
+          "sim_time"
+        ],
+        "title": "VehicleApproach"
+      },
+      "VehicleDeparture": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "vehicle_id": {
+            "type": "string",
+            "title": "Vehicle Id"
+          },
+          "trip_id": {
+            "type": "string",
+            "title": "Trip Id"
+          },
+          "line_id": {
+            "type": "string",
+            "title": "Line Id"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "stop_id": {
+            "type": "string",
+            "title": "Stop Id"
+          },
+          "stop_sequence": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Stop Sequence"
+          },
+          "arrived_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Arrived At"
+          },
+          "doors_closed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Doors Closed At"
+          },
+          "boarded": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Boarded"
+          },
+          "alighted": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Alighted"
+          },
+          "onboard": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Onboard"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon"
+          },
+          "is_terminus": {
+            "type": "boolean",
+            "title": "Is Terminus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "vehicle_id",
+          "trip_id",
+          "line_id",
+          "direction",
+          "stop_id",
+          "stop_sequence",
+          "arrived_at",
+          "doors_closed_at",
+          "boarded",
+          "alighted",
+          "onboard",
+          "lat",
+          "lon",
+          "is_terminus"
+        ],
+        "title": "VehicleDeparture"
+      },
+      "WsEnvelope": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "clock",
+              "vehicles",
+              "stops",
+              "predictions",
+              "alerts"
+            ],
+            "title": "Type"
+          },
+          "sim_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Sim Time"
+          },
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "sim_time",
+          "data"
+        ],
+        "title": "WsEnvelope"
+      }
+    }
+  }
+}

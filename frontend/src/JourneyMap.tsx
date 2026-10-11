@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import type { Network, Scenario } from './types';
-import { crowdColor, geometryFor, stopObservation, type JourneyOption } from './journey';
+import type { ApiStop } from './api/client';
+import { crowdColor, geometryFor, type JourneyOption } from './journey';
 
-type Props = { network: Network; option?: JourneyOption; origin: string; destination: string; selectedBus: string; now: number; scenario: Scenario; onStop: (id: string) => void; onBus: (id: string) => void };
-export default function JourneyMap({ network, option, origin, destination, selectedBus, now, scenario, onStop, onBus }: Props) {
+type Props = { network: Network; option?: JourneyOption; origin: string; destination: string; selectedBus: string; now: number; scenario: Scenario; liveStops?: ApiStop[]; onStop: (id: string) => void; onBus: (id: string) => void };
+export default function JourneyMap({ network, option, origin, destination, selectedBus, now, scenario, liveStops = [], onStop, onBus }: Props) {
  const container = useRef<HTMLDivElement>(null); const map = useRef<L.Map | null>(null);
  const callbacks = useRef({ onStop, onBus }); callbacks.current = { onStop, onBus };
  const routeId = option?.route.id;
@@ -76,8 +77,8 @@ export default function JourneyMap({ network, option, origin, destination, selec
    for (const stop of visible.values()) {
     const endpoint = stop.id === origin || stop.id === destination;
     if (m.getZoom() < 15 && !endpoint) continue;
-    const observation = stopObservation(stop.id, now, scenario);
-    const element = document.createElement('span'); element.className = 'journey-stop-dot'; element.style.background = crowdColor(observation.people / 30 * 100);
+    const observation = liveStops.find(s => s.stop_id === stop.id)?.waiting;
+    const element = document.createElement('span'); element.className = 'journey-stop-dot'; element.style.background = crowdColor(observation?.value == null ? null : observation.value / 30 * 100);
     if (endpoint) { element.classList.add('endpoint'); element.textContent = stop.id === origin ? 'A' : 'B'; }
     const marker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ html: element, className: 'journey-stop-marker', iconSize: [44, 44], iconAnchor: [22, 22] }), title: `${stop.name} (${stop.id})`, keyboard: true, zIndexOffset: endpoint ? 800 : 0 }).addTo(stops);
     marker.on('click', () => callbacks.current.onStop(stop.id));
@@ -88,6 +89,6 @@ export default function JourneyMap({ network, option, origin, destination, selec
   };
   renderStops(); m.on('zoomend', renderStops);
   return () => { m.off('zoomend', renderStops); layers.remove(); stops.remove(); };
- }, [network, option, origin, destination, selectedBus, now, scenario]);
+ }, [network, option, origin, destination, selectedBus, now, scenario, liveStops]);
  return <div className="journey-map-wrap"><div ref={container} className="journey-map" aria-label="Journey map: zoom in to select stops"/><div className="journey-map-key"><span className="crowd-gradient"/>Less crowded → More crowded <small>Route: {selectedBus ? 'selected bus' : 'mean of available bus forecasts'} · grey: unavailable</small></div></div>;
 }

@@ -1,7 +1,7 @@
 import type { Network, Position, Scenario } from './types.ts';
 
 export type Route = Network['lines'][number];
-export type Passage = { stopId: string; arrival: string; departure: string; arriving: number; alighting: number; boarding: number; leaving: number; leftBehind: number; percent: number | null };
+export type Passage = { stopId: string; arrival: string; departure: string; arriving: number | null; alighting: number; boarding: number; leaving: number | null; leftBehind: number; percent: number | null };
 export type JourneyTrip = { id: string; lineId: string; startsAt: string; capacity: number | null; passages: Passage[]; position: Position; positionKind: 'simulated-current' | 'predicted' | 'not-started'; observed: { people: number; at: string } | null; reliability: null };
 export type JourneyOption = { route: Route; trips: JourneyTrip[]; originIndex: number; destinationIndex: number };
 export const SERVICE = { headwayMinutes: 10, travelMinutes: 3, dwellMinutes: .5, capacity: 70 };
@@ -9,7 +9,7 @@ const MINUTE = 60_000;
 const localFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', weekday: 'short', hourCycle: 'h23' });
 const hash = (value: string) => [...value].reduce((n, c) => (n * 31 + c.charCodeAt(0)) >>> 0, 7);
 const iso = (ms: number) => new Date(ms).toISOString();
-export const fillPercent = (people: number, capacity: number | null) => capacity && capacity > 0 ? Math.round(people / capacity * 100) : null;
+export const fillPercent = (people: number | null, capacity: number | null) => people !== null && capacity && capacity > 0 ? Math.round(people / capacity * 100) : null;
 export function compatibleRoutes(network: Network, origin: string, destination = '') {
  if (!origin || origin === destination) return [];
  return network.lines.filter(route => {
@@ -108,9 +108,9 @@ export function journeyOptions(network: Network, origin: string, destination: st
 }
 export function crowdColor(percent: number | null) {
  if (percent === null) return '#87948e';
- const stops = [[0, 35, 134, 87], [40, 243, 206, 69], [65, 237, 140, 50], [100, 201, 67, 67]];
+ const stops = [[0, 35, 134, 87], [60, 35, 134, 87], [75, 243, 206, 69], [90, 237, 140, 50], [100, 201, 67, 67]];
  const value = Math.max(0, Math.min(100, percent));
- const i = Math.min(2, stops.findIndex((s, j) => j < 3 && value <= stops[j + 1][0]));
+ const i = Math.min(stops.length - 2, stops.findIndex((s, j) => j < stops.length - 1 && value <= stops[j + 1][0]));
  const a = stops[Math.max(0, i)], b = stops[Math.max(0, i) + 1]; const t = (value - a[0]) / (b[0] - a[0]);
  return `rgb(${a.slice(1).map((v, c) => Math.round(v + (b[c + 1] - v) * t)).join(',')})`;
 }
