@@ -6,7 +6,8 @@ An independent public-transport prototype combining stop crowd counts and bus oc
 
 | Branch | Purpose |
 | --- | --- |
-| `frontend-v3-inline-bus` | Current layout: selected bus expands its left-hand card with observed count, after-departure prediction and occupancy percentage |
+| `frontend-v3-map-contrast` | Current map: bus labels show only the line; white route casing with a dark outer edge improves contrast |
+| `frontend-v3-inline-bus` | Preserved layout: selected bus expands its left-hand card with observed count, after-departure prediction and occupancy percentage |
 | `frontend-v3-desktop-fit` | Preserved desktop layout: viewport-sized map and compact controls, one direction's three trips at a time, details in dialogs |
 | `frontend-v3-minimal` | Current logo-only interface: no sidebar, introductory header or scenario controls; views selected through URL hashes |
 | `frontend` | Preserved initial three-bus demo at `596f559085c134f471c79c26be38c877b0738751` |
@@ -33,6 +34,8 @@ The `frontend-v3-minimal` iteration retains that layout while removing the sideb
 The `frontend-v3-desktop-fit` iteration sizes the passenger workspace to the desktop window, compacts the search fields and displays three trips for one direction at a time. A line/direction selector exposes every compatible option without stacking cards down the left column. Selecting a bus or stop opens a dismissible detail dialog; About demo retains the synthetic-service explanation without adding page height. Small screens retain a vertical, scrollable layout. The previous minimal shell is preserved at `e2c80029697bfc3b1f77d48610de00ef9250579a`.
 
 The `frontend-v3-inline-bus` variation expands the selected trip inside the left column instead of opening a bus dialog. Its three metrics are **Currently on bus**, **Predicted after departure** and **Percentage**, with observation/departure timestamps. Percentages omit the approximation symbol; they remain synthetic predictions, not calibrated measurements. On desktop the search fields collapse during bus selection; **Edit journey** restores them. The other two trips remain visible. Stop and demo-information dialogs remain available. The previous desktop-fit iteration is preserved at `45783509036c1ae330c5e15bc7b9d4b02245aa57`.
+
+The `frontend-v3-map-contrast` variation removes trip ordinal suffixes from bus markers. Route colours retain their occupancy meaning and gain a white casing with a dark outer edge for readability against map tiles. Portions outside the selected journey remain attenuated. Trip identity and selection remain distinct even when marker labels match. The previous inline-bus version is preserved at `d63896fe6282903e142ec6a1bc19ec97916941dc`.
 
 Each compatible direction offers three distinct scheduled trips. Cards show arrival time, destination arrival when requested, and predicted occupancy **after leaving your stop**, rather than occupancy before boarding. Click a card or a bus marker for the same inline observed count, after-departure estimate and boarding concerns. The demo assumes 70 total places; unknown capacity produces no occupancy percentage. Reliability is unavailable because this new target has not been calibrated.
 
@@ -67,7 +70,7 @@ Integration remains deferred.
 Node.js 22.18+ or 24 is required (verified with 24.14).
 
 ```powershell
-# Check out frontend-v3-inline-bus for this iteration, then:
+# Check out frontend-v3-map-contrast for this iteration, then:
 cd frontend
 npm ci
 npm run dev

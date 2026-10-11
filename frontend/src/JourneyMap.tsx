@@ -31,6 +31,16 @@ export default function JourneyMap({ network, option, origin, destination, selec
     const values = trips.map(t => Date.parse(t.passages[index].departure) >= now ? t.passages[index].percent : null).filter((v): v is number => v !== null);
     return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
    };
+   // Draw all casings first so adjacent colour strokes stay on top of a continuous outline.
+   for (let i = 0; i < route.stops.length - 1; i++) {
+    const from = geometry.anchors[i], to = geometry.anchors[i + 1];
+    const path: [number, number][] = [geometry.point(from)];
+    for (let k = Math.floor(from) + 1; k < to; k++) path.push(geometry.points[k]);
+    path.push(geometry.point(to));
+    const inside = !destination || (i >= option.originIndex && i < option.destinationIndex);
+    L.polyline(path, { color: '#203c36', weight: inside ? 13 : 8, opacity: inside ? .75 : .12, interactive: false }).addTo(layers);
+    L.polyline(path, { color: '#ffffff', weight: inside ? 10 : 6, opacity: inside ? 1 : .35, interactive: false }).addTo(layers);
+   }
    // Short adjacent strokes interpolate colours along the actual shape, not stop-to-stop chords.
    for (let i = 0; i < route.stops.length - 1; i++) {
     const from = geometry.anchors[i], to = geometry.anchors[i + 1]; const a = mean(i), b = mean(i + 1);
@@ -48,7 +58,7 @@ export default function JourneyMap({ network, option, origin, destination, selec
    option.trips.forEach((trip, index) => {
     const percent = trip.passages[option.originIndex].percent;
     const element = document.createElement('span'); element.className = 'journey-bus-symbol';
-    element.textContent = `${route.name} · ${index + 1}`; element.style.background = crowdColor(percent);
+    element.textContent = route.name; element.style.background = crowdColor(percent);
     element.dataset.selected = String(selectedBus === trip.id);
     // Offset nearby labels, including services waiting at the same terminus.
     const point = m.latLngToLayerPoint([trip.position.lat, trip.position.lon]);
