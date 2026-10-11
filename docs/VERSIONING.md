@@ -10,7 +10,7 @@ The planned `v0.1.0-demo` tag and "Initial frontend demo" release are pending, n
 
 ## Workflow
 
-Current status: `frontend-v3-auto-stops` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
+Current status: `frontend-v3-responsive` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
 
 1. Commit v2 work on `frontend-v2`, preserving the baseline branch.
 2. Open component PRs targeting `integration`, in order: frontend-v2, backend, Arduino.
@@ -27,7 +27,7 @@ No force pushes, baseline tag movement, or deletion of colleagues' branches. Re-
 
 ## Capacity iteration and recovery index
 
-The active iteration is `frontend-v3-auto-stops`, based on completed place-search commit `4060eee2d7b35d0e4d9d57cc1ad96a801610e252`. It adds live place suggestions and joint automatic stop-pair selection. The working compact-bus version remains frozen at `5091b708d8e37267c7ad028035f1012ed6a188a1`. Earlier branches remain unchanged.
+The active iteration is `frontend-v3-responsive`, based on completed automatic stop-pair commit `e5ceb786857b9ea7f3c92662dc80ab4592bddeb9`. It changes passenger layout, typography and touch targets while preserving the journey and prediction models. The working compact-bus version remains frozen at `5091b708d8e37267c7ad028035f1012ed6a188a1`. Earlier branches remain unchanged.
 
 | Iteration | Preserved branch | Exact starting or completed commit |
 | --- | --- | --- |
@@ -44,7 +44,8 @@ The active iteration is `frontend-v3-auto-stops`, based on completed place-searc
 | Compact markers and before/after percentages | `frontend-v3-compact-bus` | `5091b708d8e37267c7ad028035f1012ed6a188a1` |
 | Dark green passenger panel backing | `frontend-v3-green-panel` | `f4ae391ba8bab43ba0e0c0948b4006ec9f670f5d` |
 | Address/place search and nearby stops | `frontend-v3-place-search` | `4060eee2d7b35d0e4d9d57cc1ad96a801610e252` |
-| Live place search and automatic stop pairs | `frontend-v3-auto-stops` | Starts at `4060eee2d7b35d0e4d9d57cc1ad96a801610e252` |
+| Live place search and automatic stop pairs | `frontend-v3-auto-stops` | `e5ceb786857b9ea7f3c92662dc80ab4592bddeb9` |
+| Rounded passenger workspace and responsive touch layout | `frontend-v3-responsive` | Starts at `e5ceb786857b9ea7f3c92662dc80ab4592bddeb9` |
 
 For each future iteration, keep the last delivered branch frozen and create a new working branch from its verified head. Record the source SHA and the change here. Recover a previous iteration in a separate clone using `git switch --detach <exact-commit-sha>`, or create a new branch from that SHA. Use that iteration's lockfile and README; do not reset or force-push a shared branch. Integration remains deferred.
 

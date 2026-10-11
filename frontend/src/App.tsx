@@ -8,6 +8,7 @@ import { scoreSummary } from './model';
 import MapView from './MapView';
 import Chart from './Chart';
 import PassengerJourney from './PassengerJourney';
+import TransitBrand from './TransitBrand';
 
 const time = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 const mean = (values: number[]) => values.length ? values.reduce((sum, n) => sum + n, 0) / values.length : null;
@@ -66,9 +67,9 @@ export default function App() {
  const inspected = snapshot?.stops.find(s => s.id === selectedStop);
  const stale = snapshot?.stops.filter(s => !fresh(s, snapshot.observedAt)).length ?? 0;
  const originIndex = line?.stops.findIndex(s => s.id === origin) ?? -1;
- return <div className={'app app-minimal ' + (view === 'citizens' ? 'app-passenger' : '')}><main><div className="page"><header className="minimal-header"><div className="brand minimal-brand" aria-label="Transit"><span className="brand-mark"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 16V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v11M5 11h14M5 16h14M7 16v3m10-3v3M8 7h8"/></svg></span><span>transit</span><span className="brand-dot">.</span></div></header>
+ return <div className={'app app-minimal ' + (view === 'citizens' ? 'app-passenger' : '')}><main><div className="page">{view === 'operators' && <header className="minimal-header"><TransitBrand/></header>}{view === 'citizens' && !snapshot && <header className="passenger-loading-brand"><TransitBrand/></header>}
  {error && <div className="error-message" role="alert">{error}<button onClick={() => setRetry(n => n + 1)}>Retry</button></div>}
- {!snapshot && !error && <div className="loading-message" role="status"><strong>Preparing measured demo forecasts</strong><p>{progress}</p><small>Seven days for learning, seven for calibration, seven for independent evaluation. Usually 10–20 seconds; cached for this tab.</small></div>}
+ {!snapshot && !error && <div className="loading-message" role="status"><strong>{view === 'citizens' ? 'Preparing your journey' : 'Preparing measured demo forecasts'}</strong><p>{view === 'citizens' ? 'Loading the demo network and simulated services…' : progress}</p><small>{view === 'citizens' ? 'This usually takes 10–20 seconds.' : 'Seven days for learning, seven for calibration, seven for independent evaluation. Usually 10–20 seconds; cached for this tab.'}</small></div>}
  {snapshot && network && model && line && <>
  {view === 'operators' && <><div className="operator-toolbar"><div className="tab-buttons">{(['map', 'alerts', 'history'] as const).map(t => <button key={t} className={operatorTab === t ? 'selected' : ''} aria-pressed={operatorTab === t} onClick={() => setOperatorTab(t)}>{t === 'map' ? 'Network maps' : t === 'alerts' ? 'Action center' : 'History & quality'}</button>)}</div></div><div className="metric-grid"><Metric label="Vehicles in service" value={snapshot.buses.length} note="18 × 2 · 68 × 1 · 33 × 1 · 42 × 1"/><Metric label="People at recently observed stops" value={snapshot.stops.filter(s => fresh(s, snapshot.observedAt)).reduce((n, s) => n + s.waiting!, 0).toLocaleString()} note="Unique stop IDs; stale readings excluded"/><Metric label="Possible capacity concerns" value={snapshot.alerts.length} note="One concern per stop; intended lines unknown"/><Metric label="Stale / missing stops" value={stale} note="Older than two simulated minutes"/></div></>}
  {view === 'citizens' && <PassengerJourney network={network} observedAt={snapshot.observedAt} scenario={scenario}/>}

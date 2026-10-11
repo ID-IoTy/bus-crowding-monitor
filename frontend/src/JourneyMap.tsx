@@ -62,7 +62,7 @@ export default function JourneyMap({ network, option, origin, destination, selec
     // Offset nearby labels, including services waiting at the same terminus.
     const point = m.latLngToLayerPoint([trip.position.lat, trip.position.lon]);
     const crowded = option.trips.some(other => other.id !== trip.id && point.distanceTo(m.latLngToLayerPoint([other.position.lat, other.position.lon])) < 80);
-    const marker = L.marker([trip.position.lat, trip.position.lon], { icon: L.divIcon({ html: element, className: 'journey-bus-marker', iconSize: [40, 26], iconAnchor: [20, 13 + (crowded ? index * 31 : 0)] }), title: `Line ${route.name}, option ${index + 1}, ${trip.positionKind}`, keyboard: true, zIndexOffset: selectedBus === trip.id ? 1500 : 1000 + index }).addTo(layers);
+    const marker = L.marker([trip.position.lat, trip.position.lon], { icon: L.divIcon({ html: element, className: 'journey-bus-marker', iconSize: [44, 44], iconAnchor: [22, 22 + (crowded ? index * 46 : 0)] }), title: `Line ${route.name}, option ${index + 1}, ${trip.positionKind}`, keyboard: true, zIndexOffset: selectedBus === trip.id ? 1500 : 1000 + index }).addTo(layers);
     marker.on('click', () => callbacks.current.onBus(trip.id));
     marker.getElement()?.setAttribute('role', 'button');
     marker.getElement()?.setAttribute('aria-label', `Line ${route.name}, option ${index + 1}, ${trip.positionKind}`);
@@ -79,7 +79,7 @@ export default function JourneyMap({ network, option, origin, destination, selec
     const observation = stopObservation(stop.id, now, scenario);
     const element = document.createElement('span'); element.className = 'journey-stop-dot'; element.style.background = crowdColor(observation.people / 30 * 100);
     if (endpoint) { element.classList.add('endpoint'); element.textContent = stop.id === origin ? 'A' : 'B'; }
-    const marker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ html: element, className: 'journey-stop-marker', iconSize: [28, 28], iconAnchor: [14, 14] }), title: `${stop.name} (${stop.id})`, keyboard: true, zIndexOffset: endpoint ? 800 : 0 }).addTo(stops);
+    const marker = L.marker([stop.lat, stop.lon], { icon: L.divIcon({ html: element, className: 'journey-stop-marker', iconSize: [44, 44], iconAnchor: [22, 22] }), title: `${stop.name} (${stop.id})`, keyboard: true, zIndexOffset: endpoint ? 800 : 0 }).addTo(stops);
     marker.on('click', () => callbacks.current.onStop(stop.id));
     marker.getElement()?.setAttribute('role', 'button');
     marker.getElement()?.setAttribute('aria-label', `${stop.name} (${stop.id})`);
