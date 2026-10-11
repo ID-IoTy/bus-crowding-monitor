@@ -8,9 +8,9 @@ To inspect the baseline without changing an existing checkout, clone the reposit
 
 The planned `v0.1.0-demo` tag and "Initial frontend demo" release are pending, not created. Once available, create them targeting the exact baseline SHA (or the still-frozen `frontend` branch). Include launch instructions and a note that this is a frontend-only synthetic demo. Do not target main by default.
 
-## Workflow
+## Earlier standalone workflow (historical)
 
-Current status: `frontend-v3-address-only` is the active standalone deliverable; earlier iterations are preserved. Integration is deferred by project decision; the sequence below is a future workflow, not completed work.
+Historical status before test-v2: `frontend-v3-address-only` was the standalone deliverable. The integrated workflow below supersedes this earlier plan.
 
 1. Commit v2 work on `frontend-v2`, preserving the baseline branch.
 2. Open component PRs targeting `integration`, in order: frontend-v2, backend, Arduino.
@@ -51,3 +51,19 @@ For each future iteration, keep the last delivered branch frozen and create a ne
 
 
 The active `frontend-v3-address-only` iteration starts from `a36b4376d0c0f74cebbda6e4b90d5251cf9fa8ac`. It removes the search-mode switch and introductory question; the previous responsive branch remains frozen and recoverable.
+
+
+## BusFlow integrated iteration and promotion
+
+`test-v2` was created from `test` commit `462a1fced4242c7e721c4fbb98bcc28e7677623a`. The colleague backend reference comes from `backend` commit `0c87766a13e9b5c7edb2d19e66da74b2fda2113c`, retained under `server/`. The active integrated process is under `backend/`.
+
+| Milestone | Exact preserved commit |
+| --- | --- |
+| P0 contracts and colleague backend reference | `bb940205a82d4ea8ba06bf7caca17121bac88d21` |
+| Initial integrated backend | `2b0018780fb7d6d7e942aa69db12bef89dc0f89d` |
+| Arduino gateway and mock | `cbe6d3c049eec4172052d5123ec1e78723e3a1ef` |
+| Main before BusFlow promotion | `804bba0aea5ff4595c6b51cf92a172c92424ede3` |
+
+The user requested promotion of the latest integrated version to `main`. Publish the remaining local BusFlow frontend, map CSS fix, backend refinements and launch documentation on `test-v2` first, then merge through a pull request using a merge commit. Keep `test-v2`, `test` and all earlier component/iteration branches; do not force-push or delete them. A merge does not establish real-hardware acceptance or completion of all P0/P1 checks. See the README for verified coverage and remaining limitations.
+
+To recover the prior main, create a separate checkout or branch at its exact SHA above. The pull request records the final promoted head, so every version remains recoverable through Git history.
