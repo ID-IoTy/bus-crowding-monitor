@@ -1054,3 +1054,9 @@ Exact versions are pinned in `pyproject.toml` + `uv.lock` and `package.json` + `
 - Tune the simulation parameters and alert thresholds after the first runs, so that `rush_hour` produces at least one CAPACITY_RISK on the shared section within 10 simulated minutes.
 - Authentication and TLS before any non-localhost exposure.
 
+
+### Operator history implementation (section 6 addendum)
+
+The operator-only UI now uses `GET /api/operator/history`, defined in `backend/app/contracts/history.py` and the generated OpenAPI/TypeScript schemas. It provides hourly/daily observation means, sample coverage and stop ranking over the synthetic archive. Periodic stop samples are weighted by their sample counts; occupancy uses after-departure APC samples, with assumed capacity. Null gaps stay unavailable. Route filters preserve shared-stop waiting totals, so the UI explicitly distinguishes total stop crowds from a line's vehicle load.
+
+Decision: cache grouped historical observations in process because the archive contains over one million periodic samples; the archive is rebuilt only offline and requires a server restart. This iteration implements observational history, not validated model reliability, historical sensor uptime, or causal abandonment attribution. The rounded responsive operator workspace shares the citizen view's green palette and card/touch design. There is no new public exposure or authentication claim.

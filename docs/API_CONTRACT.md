@@ -34,3 +34,11 @@ The device serves `GET /count` with `count` and a device `measured_at`, and acce
 
 This is a local unauthenticated demo. Browser origins are restricted to localhost/127.0.0.1 ports 5173 and 5174; the PC server stays on loopback. Physical device endpoints are restricted operationally to the private demo LAN.
 
+
+## Operator historical observations
+
+`GET /api/operator/history` supports optional ISO date `start`/`end`, `route_id` (directional pattern ID) and `stop_id`. The default range is the available synthetic archive, not the current simulation date. At most 31 inclusive days can be selected. Unknown IDs return 404 and invalid ranges return 422.
+
+The `HistoryView` response contains source `synthetic_history`, available/selected dates, sample counts, weighted sample means, hourly/daily series and the ten busiest stops. Missing buckets are null, never fabricated zero. Waiting uses periodic camera readings only, deduplicated by physical stop; route filters include waiting at that route's stops, without claiming all waiting passengers use that route. Bus occupancy uses that direction's after-departure APC readings, divided by the assumed 70-place capacity. High-load percentage is the share of departure samples above 90%, not time spent full. No prediction accuracy is inferred.
+
+The archive is immutable during a server session. Initial aggregation is cached in process; bootstrap must run offline and the backend must restart after rebuilding history. No simulator truth is read for these charts. The operator endpoint is local and unauthenticated like the rest of the demo; the UI exposes it only in the control room, which is not an access-control boundary.

@@ -140,6 +140,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/operator/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operator History */
+        get: operations["operator_history_api_operator_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/operator/alerts": {
         parameters: {
             query?: never;
@@ -416,6 +433,84 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HistoryBucket */
+        HistoryBucket: {
+            /** Label */
+            label: string;
+            /** Waiting Mean */
+            waiting_mean: number | null;
+            /** Onboard Percent Mean */
+            onboard_percent_mean: number | null;
+            /** Waiting Samples */
+            waiting_samples: number;
+            /** Vehicle Samples */
+            vehicle_samples: number;
+        };
+        /** HistoryStop */
+        HistoryStop: {
+            /** Stop Id */
+            stop_id: string;
+            /** Name */
+            name: string;
+            /** Mean Waiting */
+            mean_waiting: number;
+            /** Peak Waiting */
+            peak_waiting: number;
+            /** Samples */
+            samples: number;
+        };
+        /** HistorySummary */
+        HistorySummary: {
+            /** Waiting Mean */
+            waiting_mean: number | null;
+            /** Onboard Percent Mean */
+            onboard_percent_mean: number | null;
+            /** High Load Percent */
+            high_load_percent: number | null;
+            /** Waiting Samples */
+            waiting_samples: number;
+            /** Vehicle Samples */
+            vehicle_samples: number;
+            /** Observed Stops */
+            observed_stops: number;
+        };
+        /** HistoryView */
+        HistoryView: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Source
+             * @default synthetic_history
+             * @constant
+             */
+            source: "synthetic_history";
+            /** Available From */
+            available_from: string | null;
+            /** Available To */
+            available_to: string | null;
+            /** Start */
+            start: string | null;
+            /** End */
+            end: string | null;
+            /** Route Id */
+            route_id: string | null;
+            /** Stop Id */
+            stop_id: string | null;
+            /** Capacity Assumed */
+            capacity_assumed: number;
+            summary: components["schemas"]["HistorySummary"];
+            /** Hourly */
+            hourly: components["schemas"]["HistoryBucket"][];
+            /** Daily */
+            daily: components["schemas"]["HistoryBucket"][];
+            /** Busiest Stops */
+            busiest_stops: components["schemas"]["HistoryStop"][];
+            /** Notes */
+            notes: string[];
         };
         /** JourneyOption */
         JourneyOption: {
@@ -907,6 +1002,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JourneyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    operator_history_api_operator_history_get: {
+        parameters: {
+            query?: {
+                start?: string | null;
+                end?: string | null;
+                route_id?: string | null;
+                stop_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryView"];
                 };
             };
             /** @description Validation Error */
