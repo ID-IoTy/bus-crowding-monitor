@@ -118,3 +118,28 @@
  .app-passenger .map-toolbar strong{font-size:12px}.app-passenger .map-context{font-size:10px;margin-top:3px}
 }
 @media(max-width:640px){.journey-dialog .journey-detail-grid{grid-template-columns:1fr}}
+
+.journey-trip-option{min-height:0;display:flex;flex-direction:column}
+.journey-trip-option>.journey-trip{flex:1;width:100%}
+.journey-trip-option.is-expanded{border:1px solid #8ba875;border-radius:8px;background:#e9f1dc;overflow:hidden}
+.journey-trip-option.is-expanded>.journey-trip{flex:none;border:0;border-radius:0;background:transparent}
+.journey-trip-option.is-expanded>.journey-trip .trip-occupancy{display:none}
+.inline-bus-details{padding:10px 12px;border-top:1px solid #d2dfc5}
+.inline-bus-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.inline-bus-metrics small,.inline-bus-metrics strong,.inline-bus-metrics span{display:block}
+.inline-bus-metrics small{font-size:10px;line-height:1.4;color:#536e55;min-height:28px}
+.inline-bus-metrics strong{font-size:24px;margin:5px 0;color:#173e34}
+.inline-bus-metrics span{font-size:9px;line-height:1.4;color:#617368}
+.inline-bus-footer{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:8px}
+.inline-bus-footer>small{font-size:9px;color:#617368;line-height:1.5}
+.edit-journey{display:none}
+@media(min-width:761px){
+ .app-passenger .has-selected-bus .journey-search .journey-search-grid{display:none}
+ .app-passenger .has-selected-bus .journey-search .panel-title{margin:0;align-items:center}
+ .app-passenger .has-selected-bus .edit-journey{display:inline-flex;order:2;margin-left:auto}
+ .app-passenger .has-selected-bus .journey-trip-option:not(.is-expanded)>.journey-trip{padding:7px 8px}
+ .app-passenger .has-selected-bus .journey-trip-option.is-expanded>.journey-trip{padding:8px 10px}
+ .app-passenger .inline-bus-details{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+ .app-passenger .inline-bus-footer{flex-wrap:wrap}
+}
+@media(max-width:760px){.journey-trip-option.is-expanded{margin-top:8px}.inline-bus-metrics{gap:8px}.inline-bus-metrics strong{font-size:22px}}
