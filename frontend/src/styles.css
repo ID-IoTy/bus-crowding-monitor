@@ -143,3 +143,18 @@
  .app-passenger .inline-bus-footer{flex-wrap:wrap}
 }
 @media(max-width:760px){.journey-trip-option.is-expanded{margin-top:8px}.inline-bus-metrics{gap:8px}.inline-bus-metrics strong{font-size:22px}}
+
+/* Passenger presentation: dark green backing behind the existing controls. */
+.app-passenger .minimal-brand{color:#f5f8ee}
+.app-passenger .minimal-brand .brand-dot{color:#c9df96}
+.app-passenger .journey-options>.section-heading h2{color:#f5f8ee}
+.app-passenger .journey-route-picker{color:#c4d5c9}
+.app-passenger .journey-search,.app-passenger .journey-route-card{box-shadow:0 4px 18px #071e1814}
+@media(min-width:761px){
+ .app-passenger .page{position:relative;isolation:isolate}
+ .app-passenger .page::before{content:'';position:absolute;z-index:-1;inset:0 auto 0 0;width:423px;background:#153c34;pointer-events:none}
+}
+@media(max-width:760px){
+ .app-passenger .minimal-header{background:#153c34;border-radius:12px;padding:12px}
+ .app-passenger .journey-controls{background:#153c34;border-radius:14px;padding:12px}
+}
